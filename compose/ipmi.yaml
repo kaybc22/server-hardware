@@ -1,0 +1,14 @@
+modules:
+  default:
+    user: "ADMIN"
+    pass: "ADMIN"
+    driver: "LAN_2_0"
+    privilege: "admin"
+    collectors:
+      - bmc
+      - chassis
+      - dcmi
+      - ipmi
+      - sel
+    timeout: 5
+    # Replace with your BMC IP
