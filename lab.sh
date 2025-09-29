@@ -5,9 +5,10 @@ DURATION=3600
 
 #install Linux utilities
 install_utls() {
-  fsefsfe apt install -y  fio sysstat nvme-cli sshpass ipmitool dos2unix infiniband-diags libibumad3 make gcc hwloc numactl net-tools mstflint pv powertop nload iftop unzip dos2unix expect jq linux-tools-common
+  apt update
+  apt install -y  fio sysstat nvme-cli sshpass ipmitool dos2unix infiniband-diags libibumad3 make gcc hwloc numactl net-tools mstflint pv powertop nload iftop unzip dos2unix expect jq linux-tools-common
+#  distribution=$(. /etc/os-release;echo $ID$VERSION_ID | sed -e 's/\.//g'); wget https://developer.download.nvidia.com/compute/cuda/repos/$distribution/x86_64/cuda-keyring_1.1-1_all.deb; sudo dpkg -i cuda-keyring_1.1-1_all.deb; apt update
 
-  efsefse
 }
 
 # Stress test function
@@ -16,7 +17,7 @@ run_stress_tests() {
   stressapptest -W -s $DURATION -M $(($(free -m | awk '/Mem:/ {print int($2 * 0.8)}'))) -m 8
 
   echo "===== Running fio on NVMe ====="
-  fio --name=nvme_test --filename=/dev/nvme0n1 --rw=randwrite --bs=4k --size=1G --numjobs=4 --time_based --runtime=$DURATION --group_reporting
+#  fio --name=nvme_test --filename=/dev/nvme0n1 --rw=randwrite --bs=4k --size=1G --numjobs=4 --time_based --runtime=$DURATION --group_reporting
 
   echo "===== Running Python CPU stress ====="
   python3 - <<EOF
@@ -43,6 +44,7 @@ EOF
 nccl() {
   installed=$(apt list --installed 2>/dev/null | grep -i nccl | grep '2.28.3-1+cuda13.0')
   version=$(apt list --installed 2>/dev/null | grep -i '^libnccl2/' | awk -F'/' '{print $2}' | awk '{print $1}')
+# strings /usr/lib/x86_64-linux-gnu/libnccl.so | grep  "NCCL version"
   if [ -n "$version" ]; then
     echo "nccl version $version"
   else
@@ -53,6 +55,11 @@ nccl() {
   #./build/alltoall_perf -b 8 -e 32G -f 2 -t 8
 }
 
+# nvbandwidth
+nvbandwidth() {
+  apt install libboost-program-options-dev -y; git clone https://github.com/NVIDIA/nvbandwidth; cd $(pwd)/nvbandwidth; sudo ./debian_install.sh; cmake .; make
+  ./nvbandwidth
+}
 
 hardware_info() {
 # Display system hardware info
@@ -64,6 +71,7 @@ dmidecode -t bios | grep -v "#" |grep -iE "present|vendor|version|release|size"
 echo ""
 echo -e "\033[32m=====System CPU Info=====\033[0m"
 lscpu | egrep -i "core|numa|mib|mhz|model"
+#numactl --hardware
 echo ""
 echo -e "\033[32m=====System Mem Info=====\033[0m"
 echo "There are toltal $(dmidecode -t memory | grep -i "form factor" | wc -l) memory sticks"
@@ -85,7 +93,16 @@ echo -e "\033[32m=====GPU Network components=====\033[0m"
 lspci | egrep -i "nvidia|mella"
 echo ""
 echo -e "\033[32m================================\033[0m"
+echo ""
+echo -e "\033[32m=====PCIe devices and Bus_ID=====\033[0m"
+lspci | egrep -i "mella|nvidia|nvme|volatile|eth"
+echo ""
+echo -e "\033[32m================================\033[0m"
+
 }
+
+#Update nad install the Utls
+#install_utls
 
 #call hardware info function
 hardware_info
