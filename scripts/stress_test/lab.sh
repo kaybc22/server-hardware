@@ -61,6 +61,17 @@ nvbandwidth() {
   ./nvbandwidth
 }
 
+#DCGM
+dcgm () {
+   sudo apt-get install -y datacenter-gpu-manager-4-cuda13
+   sudo systemctl --now enable nvidia-dcgm; sudo systemctl start nvidia-dcgm; dcgmi discovery -l
+#enable the GPU persistent mode
+   #for i in {0..7}; do nvidia-smi -i $i -pl 1000; done
+   #for i in {0..7}; do nvidia-smi -i $i -pm 1; done
+   #time dcgmi diag -r 4 & nvidia-smi --query-gpu=timestamp,index,temperature.gpu,temperature.memory,temperature.gpu.tlimit,power.draw,power.draw.average,utilization.gpu,utilization.memory,clocks_throttle_reasons.active --format=csv -l 1 -f $(pwd)/gpu_usage_$(date +%s%3N).log &
+   #time dcgmi diag --run diagnostic,memtest,targeted_power --parameters targeted_power.test_duration=500 --iterations 2 & nvidia-smi --query-gpu=timestamp,index,temperature.gpu,temperature.memory,temperature.gpu.tlimit,power.draw,utilization.gpu,utilization.memory,clocks_throttle_reasons.active --format=csv -l 1 -f $(pwd)/gpu_usage$(date +%Y%m%d_%H%M%S).log &
+}
+
 hardware_info() {
 # Display system hardware info
 echo -e "\033[32m===== SYSTEM HARDWARE INFO =====\033[0m"
