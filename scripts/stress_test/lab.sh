@@ -112,3 +112,6 @@ hardware_info
 
 #call nccl function
 #nccl
+
+#call nvbandwidth function
+#nvbandwidth
