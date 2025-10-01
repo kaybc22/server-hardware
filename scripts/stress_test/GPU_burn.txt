@@ -1,8 +1,11 @@
 ##GPU_burn
 git clone https://github.com/wilicc/gpu-burn; cd $(pwd)/gpu-burn ; make #make COMPUTE=100 for B200
+
+#Dokcer
 docker build -t gpu_burn .
 docker run --rm --gpus all gpu_burn
 
+#Specific GPU compute support
 +gpu_burn-drv.cpp (line 113 is the issue)
         #checkError(cuCtxCreate(&d_ctx, 0, d_dev)); #remove completely
 +add: 

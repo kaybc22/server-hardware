@@ -1,0 +1,122 @@
+#Redfish Managment
+
+-X GET https://$bmc_ip/
+
+#Check FW version
+curl -skL -u "user:passwd" -X GET bmc_ip/redfish/v1/UpdateService/FirmwareInventory/HGX_FW_ERoT_FPGA_0 | jq 
+curl -skL -u "user:passwd" -X GET bmc_ip/redfish/v1/UpdateService/FirmwareInventory/HGX_FW_BMC_0 | jq
+curl -skL -u "user:passwd" -X GET bmc_ip/redfish/v1/UpdateService/FirmwareInventory/HGX_FW_FPGA_0 | jq
+curl -skL -u "user:passwd" -X GET bmc_ip/redfish/v1/UpdateService/FirmwareInventory/HGX_FW_GPU_SXM_1| jq
+curl -skL -u "user:passwd" -X GET bmc_ip/redfish/v1/UpdateService/FirmwareInventory/HGX_FW_NVLinkManagementNIC_0  | jq
+curl -skL -u "user:passwd" -X GET bmc_ip/redfish/v1/UpdateService/FirmwareInventory/HGX_FW_NVSwitch_0 | jq 
+curl -skL -u "user:passwd" -X GET bmc_ip/redfish/v1/UpdateService/FirmwareInventory/HGX_FW_PCIeRetimer_7| jq
+
+curl -skL -u "user:passwd" -X GET bmc_ip/redfish/v1/UpdateService/FirmwareInventory/HGX_FW_PCIeRetimer_0 | python -m json.tool
+curl -skL -u "user:passwd" -X GET bmc_ip/redfish/v1/UpdateService/FirmwareInventory/HGX_FW_GPU_SXM_1| python -m json.tool  findstr "ID Version"
+curl -skL -u "user:passwd" -X GET bmc_ip/redfish/v1/UpdateService/FirmwareInventory/HGX_FW_NVSwitch_0 | python -m json.tool
+curl -skL -u "user:passwd" -X GET bmc_ip/redfish/v1/UpdateService/FirmwareInventory/HGX_FW_BMC_0 | python -m json.tool |  findstr "ID Version"
+curl -skL -u "user:passwd" -X GET bmc_ip/redfish/v1/UpdateService/FirmwareInventory/HGX_FW_ERoT_FPGA_0 | python -m json.tool
+curl -skL -u "user:passwd" -X GET bmc_ip/redfish/v1/UpdateService/FirmwareInventory/HGX_FW_FPGA_0 | python -m json.tool
+curl -skL -u "user:passwd" -X GET bmc_ip/redfish/v1/UpdateService/FirmwareInventory/GPU8 | python -m json.tool
+curl -skL -u "user:passwd" -X GET bmc_ip/redfish/v1/UpdateService/FirmwareInventory/HGX_FW_FPGA_0 | python -m json.tool
+curl -skL -u "user:passwd" -X GET bmc_ip/redfish/v1/UpdateService/FirmwareInventory/HGX_FW_NVLinkManagementNIC_0  |  python -m json.tool | findstr "ID Version"
+
+#B200 FW update
+#win
+for /l %i in (1, 1, 8) do (curl -skL -u "user:passwd" -X GET bmc_ip/redfish/v1/UpdateService/FirmwareInventory/HGX_FW_GPU_SXM_%i| python -m json.tool | findstr "Id Version")
+for %i in (1 2 3 4 5 6 7 8) do start /b curl -skL -u "user:passwd" -X GET bmc_ip/redfish/v1/UpdateService/FirmwareInventory/HGX_FW_GPU_SXM_%i | python -m json.tool | findstr "Id Version"
+for /l %i in (1, 1, 8) do (curl -skL -u "user:passwd" -X GET bmc_ip/redfish/v1/Systems/HGX_Baseboard_0/Processors/GPU_SXM_%i/Ports/PCIe_0| python -m json.tool | findstr "ActiveWidth")
+curl -X POST bmc_ip/redfish/v1/UpdateService/upload -H "content-type: multipart/form-data" -F UpdateFile=@nvfw_HGX-B100-B200x8_0009_250828.1.1_custom_prod-signed.fwpkg -F "UpdateParameters={\"Targets\":[\"\"], \"@Redfish.OperationApplyTime\": \"OnReset\"}" -u "test:Supermicro1234" -k #windows
+curl -X POST bmc_ip/redfish/v1/UpdateService/upload -H "content-type: multipart/form-data" -F UpdateFile=@nvfw_HGX-B100-B200x8_0009_241104.1.2_a_custom_prod-signed.fwpkg -F "UpdateParameters={\"Targets\":[\"\"], \"@Redfish.OperationApplyTime\": \"OnReset\"}" -u "user:passwd" -k
+
+
+#Linux
+curl -k -X POST https://{BMC_IP}/redfish/v1/UpdateService/upload -H ‘content-type: multipart/form-data’ -F UpdateFile=@//$IMG_PATH -F ‘UpdateParameters={"Targets":[""], "@Redfish.OperationApplyTime": "OnReset"}’ -u "user:passwd" -kv
+curl -k -X POST https://$BMC_IP/redfish/v1/UpdateService/upload -H 'content-type: multipart/form-data' -F UpdateFile=@FW.fwpkg -F 'UpdateParameters={"Targets":[""], "@Redfish.OperationApplyTime": "OnReset"}' -u "@USER:$PASS" -kv
+
+curl -skL -u "user:passwd" -X GET bmc_ip/redfish/v1/UpdateService/FirmwareInventory/HGX_FW_PCIeRetimer_0 | python -m json.tool
+for i in {0..8}; do echo GPU_SXM_$i; curl -skL -u "user:passwd" -X GET bmc_ip/redfish/v1/UpdateService/FirmwareInventory/HGX_FW_PCIeRetimer_${i} | jq; done
+
+curl -X POST bmc_ip/redfish/v1/UpdateService/upload -H 'content-type: multipart/form-data' -F UpdateFile=@nvfw_HGX-B100-B200x8_0009_250723.1.0_custom_prod-signed.fwpkg -F 'UpdateParameters={"Targets":[""], "@Redfish.OperationApplyTime": "OnReset"}' -u "ADMIN:PKURROLMDV" -k #Linux 
+output --> {"@odata.type":"#Task.v1_5_1.Task","@odata.id":"/redfish/v1/TaskService/Tasks/1","Id":"1","Name":"HGX Update","TaskState":"Running","StartTime":"2024-11-26T16:57:24+00:00","PercentComplete":0,"HidePayload":true,"TaskMonitor":"/redfish/v1/TaskMonitor/fa37JncCHryDsbzayy4cBWDxS22Jjzh","TaskStatus":"OK","Messages":[],"Oem":{}}
+
+#check status
+curl -X GET bmc_ip/redfish/v1/TaskService/Tasks/HGX_0 -u "test:Supermicro1234" -k | python -m json.tool
+
+#Update GPU component
+curl -X POST -T nvfw_HGX-B100-B200x8_0009_241104.1.2_a_custom_prod-signed.fwpkg -kv -u "user:passwd" bmc_ip/redfish/v1/Oem/Supermicro/HGX_B200/UpdateService/
+-X POST -H "Content-Type: application/json" --data "{ \"ImageURI\" : \"http://%SERVER_IP%/Nvidia.fwpkg\" , \"TransferProtocol\" : \"HTTP\", [\"/redfish/v1/UpdateService/FirmwareInventory/HGX_FW_BMC_0\"]"
+redfish/v1/UpdateService/FirmwareInventory/HGX_FW_PCIeRetimer_0
+
+#NV
+curl -s -k -u $USER:$PASS bmc_ip/redfish/v1/UpdateService/Actions/UpdateService.SimpleUpdate -X 
+POST -H "Content-Type: application/json" --data '{ "ImageURI" : "http://$SERVER_IP/Nvidia.fwpkg" , "TransferProtocol" : "HTTP", "Targets" : ["/redfish/v1/UpdateService/FirmwareInventory/HGX_FW_BMC_0"]}'
+
+#Troubleshooting
+curl -skL -u "user:passwd" -X GET bmc_ip/redfish/v1/Systems/HGX_Baseboard_0/Processors/GPU_SXM_2/Ports/PCIe_0 | python -m json.tool
+curl -skL -u "user:passwd" -X GET bmc_ip/redfish/v1/Managers/HGX_BMC_0/LogServices/EventLog/Entries | python -m json.tool
+curl -skL -u user:passwd -X GET bmc_ip/redfish/v1/Chassis/1/PCIeDevices/NIC1/PCIeFunctions/1/ | python -m json.tool
+curl -skL -u user:passwd -X GET bmc_ip/redfish/v1/Chassis/1/PCIeDevices/NIC9/PCIeFunctions/ | python -m json.tool
+curl -skL -u user:passwd -X GET bmc_ip/redfish/v1/Systems/1/EthernetInterfaces/ | python -m json.tool
+curl -skL -u user:passwd -X GET bmc_ip/redfish/v1/Managers/1/EthernetInterfaces/ToHost/ | python -m json.tool
+curl -skL -u user:passwd -X GET bmc_ip/redfish/v1/Managers/1/NetworkProtocol | python -m json.tool
+curl -skL -u "user:passwd" -X GET bmc_ip/redfish/v1/Chassis/1/PowerSubsystem/PowerSupplies/ | python -m json.tool
+curl -skL -u user:passwd -X GET bmc_ip/redfish/v1/Chassis/1/PowerSubsystem/PowerSupplies/ | python -m json.tool
+curl -skL -u "user:passwd" -X GET bmc_ip/redfish/v1/Chassis/HGX_Chassis_0
+curl -skL -u "user:passwd" -X GET bmc_ip/redfish/v1/Chassis/HGX_GPU_SXM_1/Sensors/HGX_GPU_SXM_1_TEMP_1
+
+curl -skL -u "user:passwd" -X GET bmc_ip/redfish/v1/Chassis/HGX_GPU_SXM_8/Sensors/HGX_GPU_SXM_8_TEMP_1 | jq | egrep -i "Name|Reading" | head -2
+curl -skL -u "user:passwd" -X GET bmc_ip/redfish/v1/Chassis/HGX_GPU_SXM_8/Sensors/HGX_GPU_SXM_8_Power_0 | jq |grep -iv time | egrep -i "Name|PeakReading|reading" | head -3
+
+for i in {1..8}; do 
+curl -skL -u "$a:$b" -X GET https://x.x.x.x/redfish/v1/Chassis/HGX_GPU_SXM_$i/Sensors/HGX_GPU_SXM_$i_TEMP_1 | jq | egrep -i "Name|Reading" | head -2 >> $logs.txt ;
+curl -skL -u "$a:$b" -X GET https://x.x.x.x/redfish/v1/Chassis/HGX_GPU_SXM_$i/Sensors/HGX_GPU_SXM_$i_Power_0 | jq |grep -iv time | egrep -i "Name|PeakReading|reading" | head -3 >> $logs.txt ;
+done
+
+for i in {1..8}; do echo GPU_SXM_$i; curl -skL -u "user:passwd" -X GET bmc_ip/redfish/v1/Systems/HGX_Baseboard_0/Processors/GPU_SXM_$i/Ports/PCIe_0 | grep -i ActiveWidth ; done
+
+#row remmaped
+curl -skL -u "user:passwd" -X GET bmc_ip/redfish/v1/Oem/Supermicro/HGX_B200/Systems/HGX_Baseboard_0/Memory/GPU_SXM_1_DRAM_0/MemoryMetrics
+curl -skL -u "user:passwd" -X GET bmc_ip/redfish/v1/Chassis/HGX_GPU_SXM_8/Sensors/HGX_GPU_SXM_8_TEMP_1 
+
+#retimer
+
+curl -skL -u "user:passwd" -X GET bmc_ip/redfish/v1/Fabrics/HGX_PCIeRetimerTopology_0/Switches/PCIeRetimer_0 | jq
+curl -skL -u "user:passwd" -X GET bmc_ip/redfish/v1/Fabrics/HGX_PCIeRetimerTopology_0/Switches/PCIeRetimer_0/Ports/DOWN_0 | jq
+curl -skL -u "user:passwd" -X GET bmc_ip/redfish/v1/Chassis/HGX_PCIeRetimer_0/PCIeDevices/PCIeRetimer_0 | jq
+curl -skL -u "user:passwd" -X GET bmc_ip/redfish/v1/Chassis/HGX_PCIeRetimer_0/Sensors/HGX_PCIeRetimer_0_TEMP_0 | jq
+curl -skL -u "user:passwd" -X GET bmc_ip/redfish/v1/Chassis/HGX_PCIeRetimer_0/LogServices
+
+#action
+curl -u user:passwd -X POST bmc_ip/redfish/v1/Oem/Supermicro/HGX_H100/Managers/HGX_BMC_0/Actions/Oem/NvidiaManager.SyncOOBRawCommand -d "{\"TargetType\" : \"Baseboard\" , \"TargetInstanceId\" : 0, \"Opcode\" : \"B1\", \"Arg1\" : \"00\", \"Arg2\" : \"00\"}"
+
+curl -skL -u "user:passwd" -X GET bmc_ip/redfish/v1/Systems/HGX_Baseboard_0/Processors/GPU_SXM_6/Ports/PCIe_0/Metrics/Oem/Nvidia/ClearPCIeCountersActionInfo
+
+-d ' {"PowerLimitWatts": { "SetPoint": 666}}'
+
+#Reset
+curl -skL -X POST -u "user:passwd" -H "Content-Type:application/json" -d "{\"ResetType\": \"GracefulRestart\"}" "bmc_ip/redfish/v1/Managers/HGX_BMC_0/Actions/Manager.Reset"
+curl -skL -u "user:passwd" -X POST -d '{"ResetType":"ForceRestart"}' bmc_ip/redfish/v1/Systems/HGX_Baseboard_0/Processors/GPU_SMX_6/Actions/Processor.Reset
+curl -skL -u "user:passwd" -X POST -d '{"CounterType": which property}' bmc_ip/redfish/v1/Systems/HGX_Baseboard_0/Processors/GPU_SMX_6/Actions/Processor.Reset
+
+#serial #
+curl -skL -u "user:passwd" bmc_ip/redfish/v1/Oem/Supermicro/HGX_B200/Chassis/HGX_Chassis_0/Assembly   | python -m json.tool |   jq ".SerialNumber,.PartNumber,.Manufacturer,.Model"
+curl -skL -u "user:passwd" bmc_ip/redfish/v1/Oem/Supermicro/HGX_B200/Chassis/HGX_BMC_0/Assembly  | python -m json.tool
+
+
+###download
+curl -skL -u "user:passwd" -X GET bmc_ip/redfish/v1/Oem/Supermicro/HGX_B200/Systems/HGX_Baseboard_0/LogServices/EventLog/Entries --output fpga-report.txt
+
+#system
+curl -skL -u "user:passwd"" http://bmc_ip/redfish/v1/Systems/1|  jq ".SerialNumber,.PartNumber,.Manufacturer,.Model"
+/redfish/v1/Systems/1/EthernetInterfaces/1
+/redfish/v1/Chassis/1/Sensors/LiquidLeak
+/redfish/v1/Chassis/1/NetworkAdapters/1/NetworkDeviceFunctions/1
+
+
+curl -skL -u "user:passwd" bmc_ip/redfish/v1/Oem/Supermicro/HGX_B200/Chassis/HGX_Chassis_0/Assembly    
+curl -skL -u "user:passwd" -X GET bmc_ip/redfish/v1/Managers/HGX_BMC_0 | python -m json.tool 
+curl -skL -u "user:passwd" -X GET bmc_ip/redfish/v1/Systems/HGX_Baseboard_0/Processors/GPU_SXM_8/  
+curl -skL -u "user:passwd" -X GET bmc_ip/redfish/v1/Systems/HGX_Baseboard_0/Memory/GPU_SXM_8_DRAM_0 
+curl -skL -u "user:passwd" -X GET bmc_ip/redfish/v1/Chassis/HGX_GPU_SXM_1/Sensors/HGX_GPU_SXM_1_TEMP_1 
+curl -skL -u "user:passwd" -X GET bmc_ip/redfish/v1/Chassis/HGX_GPU_SXM_8/Sensors/HGX_GPU_SXM_8_TEMP_1 

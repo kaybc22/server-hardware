@@ -2,53 +2,13 @@
 #CUDA_VISIBLE_DEVICES=0,2,3,4,5,6,7 ./cuda_check
 #sudo nvidia-smi -q -i 1 1 -c  -d 
 
-#systemctl stop *nvidia* #sudo rmmod nvidia_uvm nvidia_drm nvidia_modeset nvidia
-#echo 1 | sudo tee /sys/bus/pci/devices/0000\:1a\:00.0/remove
+#GPU issue
+systemctl stop *nvidia* #sudo rmmod nvidia_uvm nvidia_drm nvidia_modeset nvidia
+echo 1 | sudo tee /sys/bus/pci/devices/0000\:1a\:00.0/remove
 
-#echo 1 | sudo tee /sys/bus/pci/rescan
+echo 1 | sudo tee /sys/bus/pci/rescan
 
-#include <iostream>
-#include <cuda_runtime.h>
-int main() {
-   int deviceCount = 0;
-   cudaError_t err = cudaGetDeviceCount(&deviceCount);
-   if (err != cudaSuccess) {
-       std::cerr << "cudaGetDeviceCount failed: "
-<< cudaGetErrorString(err) << std::endl;
-       return 1;
-   }
-   std::cout << "Detected " << deviceCount << " CUDA device(s)\n";
-   for (int i = 0; i < deviceCount; i++) {
-       std::cout << "\nChecking GPU " << i << "...\n";
-       // Try to set the device
-       err = cudaSetDevice(i);
-       if (err != cudaSuccess) {
-           std::cerr << "  Failed to set device " << i << ": "
-<< cudaGetErrorString(err) << std::endl;
-           continue;
-       }
-       // Query device properties
-       cudaDeviceProp prop;
-       err = cudaGetDeviceProperties(&prop, i);
-       if (err != cudaSuccess) {
-           std::cerr << "  Failed to get properties: "
-<< cudaGetErrorString(err) << std::endl;
-           continue;
-       }
-       std::cout << "  Name: " << prop.name
-<< " | Global Mem: " << (prop.totalGlobalMem >> 20) << " MB"
-<< " | SMs: " << prop.multiProcessorCount << std::endl;
-       // Test a small allocation
-       void* d_ptr = nullptr;
-       err = cudaMalloc(&d_ptr, 1024);
-       if (err != cudaSuccess) {
-           std::cerr << "  cudaMalloc failed: "
-<< cudaGetErrorString(err) << std::endl;
-       } else {
-           std::cout << "  cudaMalloc test OK\n";
-           cudaFree(d_ptr);
-       }
-   }
-   return 0;
-}
+sudo apt install hwloc -y
+lstopo --output-format png > lstopo.png
+
 
