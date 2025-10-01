@@ -7,40 +7,6 @@
 
 #echo 1 | sudo tee /sys/bus/pci/rescan
 
-SpeedChange
-	#Link status
-	lsts=$(setpci -s $BDF CAP_EXP+I2.W)
-	#setting the target speed
-	setpci -s $BDF CAP_EXP+III0.L=$speed:0xf
-	setpci -s $BDF CAP_EXP+I0.W=II0:II0
-	# Set reset bit
-	setpci -s $BDF 0x3E.W=IV0:IV0
-	sleep 0.1
-	# Clear reset bit
-	setpci -s $BDF 0x3E.W=0:IV0
-
-SBR
-	# Added 0.8 sec delay
-	sleep 0.8
-	# Set reset bit
-	setpci -s $BDF 0x3E.W=IV0:IV0
-	#sleep 0.1
-	# Clear reset bit
-	setpci -s $BDF 0x3E.W=0:IV0
-	#sleep 1
-
-LinkDisEna
-	#Disable
-	setpci -s $BDF CAP_EXP+I0.W=I0:I0 
-	sleep 0.1
-
-	#Enable
-	setpci -s $BDF CAP_EXP+I0.W=0:I0
-	#sleep 0.7
-
-retrain
-setpci -s $BDF CAP_EXP+I0.W=II0:II0
-
 #include <iostream>
 #include <cuda_runtime.h>
 int main() {
