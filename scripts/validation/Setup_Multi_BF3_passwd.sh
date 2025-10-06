@@ -14,8 +14,8 @@ set username "ubuntu"
 set password "ubuntu"
 set root_access "sudo su -"
 set root_passwd "passwd"
-set set_ubuntu_passwd "GPUthermal123"
-set set_root_passwd "Supermicro12345"
+set set_ubuntu_passwd "$Passwd"
+set set_root_passwd "$Root_Passwd"
 set command "ip a | grep -i 'oob_net'"
 
 # Start screen
@@ -58,3 +58,4 @@ EOF
 done
 
 for i in $(screen -ls | grep -i $(hostname) | awk '{print $1}'); do screen -X -S $i  quit; done
+
