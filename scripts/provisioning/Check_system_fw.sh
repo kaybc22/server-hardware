@@ -1,6 +1,7 @@
 #!/bin/bash
-# Usage: ./redfish_list.sh <bmc-url> <username> <password>
-# Redfish Firmware 
+# Usage: ./Check_system_fw.sh <bmc-url> <username> <password>
+#./Check_system_fw.sh https://172.31.53.157/ ADMIN ADMIN
+ 
 
 BMC_URL="$1"
 USERNAME="$2"
