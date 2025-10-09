@@ -1,5 +1,11 @@
 #!/bin/bash
 
+LOGS="$1"
+
+if [ -z "$LOGS" ]; then
+  echo "Log location is empty"
+fi
+
 remote (){
 for i in {1..40}; do
   echo "Power cycling the system: Attempt $i"
@@ -18,10 +24,10 @@ local (){
 for i in {1..40}; do
   echo "Power cycling the system: Attempt $i"
   ipmitool chassis power cycle
-  date >> /opt/testing/logs/onoff_timestamp.txt
+  date >> $LOGS/onoff_timestamp.txt
   echo "Waiting for 10 minutes..."
   sleep 720 # Sleep for 10 minutes
 done
 }
 
-local
+#local
