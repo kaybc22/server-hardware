@@ -1,0 +1,81 @@
+{          
+    "general": {
+       "duration": 100,
+       "setup_prep": true,
+       "system_info": true,
+       "not_safe_mode": false,
+       "port_ip_subnet": null,
+       "disabled_measurements": [],
+       "debug": false,
+       "ports_config": true,
+       "disable_host_system_logs": false
+    },
+    "players": [
+    {
+       "bf":{
+          "ip":"172.31.40.20",
+          "username": "ubuntu",
+          "password": "Supermicro1234",
+          "pci":"0000:2c:00",
+          "sd_pcie": null
+       },
+       "cores": null,
+       "accelerators": []
+    },
+    {
+       "bf":{
+          "ip":"172.31.61.68",
+          "username": "ubuntu",
+          "password": "Supermicro1234",
+          "pci":"0000:ad:00",
+          "sd_pcie": null
+       },
+       "cores": null,
+       "accelerators": []
+    },
+    {
+       "bf":{
+          "ip":"172.31.43.40",
+          "username": "ubuntu",
+          "password": "Supermicro1234",
+          "pci":"0000:1a:00",
+          "sd_pcie": null
+       },
+       "cores": null,
+       "accelerators": [],
+       "partner": {
+         "bf": {
+          "ip":"172.31.50.109",
+          "username": "ubuntu",
+          "password": "Supermicro1234",
+          "pci":"0000:41:00",
+          "sd_pcie": null
+       },
+       "cores": null,
+       "accelerators": []
+      }
+    },
+    {
+       "bf":{
+          "ip":"172.31.42.237",
+          "username": "ubuntu",
+          "password": "Supermicro1234",
+          "pci":"0000:d2:00",
+          "sd_pcie": null
+       },
+       "cores": null,
+       "accelerators": [],
+       "partner": {
+         "bf": {
+          "ip":"172.31.50.106",
+          "username": "ubuntu",
+          "password": "Supermicro1234",
+          "pci":"0000:e4:00",
+          "sd_pcie": null
+       },
+       "cores": null,
+       "accelerators": []
+      }
+    }       
+  ]
+}

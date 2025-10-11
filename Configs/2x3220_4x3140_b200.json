@@ -1,0 +1,59 @@
+{
+  "custom_configuration": {
+    "blacklist_device": [
+      "0000:04:00.0",
+      "0000:04:00.1",
+      "0000:04:00.2",
+      "0000:04:00.3"
+    ],
+    "bluefield_players": [
+      {
+        "bdf": "0000:2c:00.2",
+        "username": "ubuntu",
+        "password": "Supermicro1234",
+        "ip": "172.31.40.20"
+      },
+    "bluefield_players": [
+      {
+        "bdf": "0000:ad:00.2",
+        "username": "ubuntu",
+        "password": "Supermicro1234",
+        "ip": "172.31.61.68"
+      },
+    "bluefield_players": [
+      {
+        "bdf": "0000:1a:00.1",
+        "username": "ubuntu",
+        "password": "Supermicro1234",
+        "ip": "172.31.43.40"
+      },
+    "bluefield_players": [
+      {
+        "bdf": "0000:41:00.1",
+        "username": "ubuntu",
+        "password": "Supermicro1234",
+        "ip": "172.31.50.109"
+      },
+    "bluefield_players": [
+      {
+        "bdf": "0000:d2:00.1",
+        "username": "ubuntu",
+        "password": "Supermicro1234",
+        "ip": "172.31.42.237"
+      },
+    "bluefield_players": [
+      {
+        "bdf": "0000:e4:00.1",
+        "username": "ubuntu",
+        "password": "Supermicro1234",
+        "ip": "172.31.50.106"
+      }
+    ],
+    "bluefield_loopback_topology": {
+      "0000:2c:00.0": "0000:2c:00.1"
+      "0000:ad:00.0": "0000:ad:00.1"
+      "0000:1a:00.0": "0000:41:00.0"
+      "0000:d2:00.0": "0000:e4:00.0"
+    },
+  }
+}

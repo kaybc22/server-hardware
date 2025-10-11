@@ -1,0 +1,28 @@
+{
+  "custom_configuration": {
+    "bluefield_players": [
+      {
+        "bdf": "0000:2c:00.2", #Using DMA port
+        "username": "ubuntu",
+        "password": "ubuntu",
+        "ip": "172.31.x.x"
+      }
+    ],
+    "blacklist_device": [
+      "0000:ad:00.0",
+      "0000:04:00.0",
+      "0000:04:00.1",
+      "0000:04:00.2",
+      "0000:04:00.3"
+    ],
+    "bluefield_loopback_topology": {
+      "0000:2c:00.0": "0000:2c:00.1" #loop back if using 2 port Device loopback
+    },
+    "connectx_loopback_topology": { 
+      "0000:1a:00.0": "0000:41:00.0",
+      "0000:52:00.0": "0000:65:00.0",
+      "0000:9b:00.0": "0000:bf:00.0",
+      "0000:d2:00.0": "0000:e4:00.0"
+    }
+  }
+}
