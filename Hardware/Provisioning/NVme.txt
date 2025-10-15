@@ -1,0 +1,62 @@
+ls -l --color /dev/disk/by-path/ | grep -v '\-part' | sort -k11 #| awk '{ print $9 $10 $11}'
+
+for i in {0..9}; do echo /dev/nvme${i}n1; sudo nvme smart-log /dev/nvme1n1 | grep -i temperature; done
+for i in {0..9}; do echo /dev/nvme${i}n1; nvme id-ctrl /dev/nvme${i}n1| grep -va subnqn | grep sn; done
+
+
++benchmark
+++nvme
+sudo fio --name=nvme8n1-test --filename=/dev/nvme8n1 \
+  --rw=read --bs=256k --ioengine=libaio --iodepth=32 \
+  --numjobs=1 --time_based --runtime=30 --direct=1 \
+  --group_reporting
+++nvme raid1
+sudo apt install -y mdadm; sudo mdadm --create --verbose /dev/md0 --level=0 --raid-devices=2 /dev/nvme6n1 /dev/nvme5n1; 
+sudo mkfs.ext4 /dev/md0; sudo mkdir -p /mnt/raid0; sudo mount /dev/md0 /mnt/raid0
+sudo fio --name=raid0-test --filename=/dev/md0 \
+  --rw=read --bs=256k --ioengine=libaio --iodepth=32 \
+  --numjobs=1 --time_based --runtime=30 --direct=1 \
+  --group_reporting
+++nvme part
+sudo fio --name=nvme4n1-test --filename=/dev/nvme4n1p1 \
+  --rw=read --bs=256k --ioengine=libaio --iodepth=32 \
+  --numjobs=1 --time_based --runtime=30 --direct=1 \
+  --group_reporting
+  
++filesystem
+sudo fdisk /dev/nvme4n1 --> g --> n --> t (default) pick 20 for linux file system --> w
+sudo mkfs.ext4 /dev/nvme4n1p1
+sudo mount /dev/nvme4n1p1 /opt/testing/app1
+
++vg
+vgdisplay ubuntu-vg
+lvcreate -L 2000G -n app ubuntu-vg
+mkfs.ext4 /dev/ubuntu-vg/nv-storage
+mount /dev/ubuntu-vg-1/app /opt/testing/app
+echo "/dev/ubuntu-vg/app /opt/testing/app ext4 defaults 0 2" | sudo tee -a /etc/fstab
+/dev/ubuntu-vg/docker-volume /opt/testing/docker/volume ext4 defaults 0 2
++extend root
++sudo vgdisplay ubuntu-vg
++sudo lvextend -L 1200G /dev/ubuntu-vg/ubuntu-lv
++sudo resize2fs /dev/ubuntu-vg/ubuntu-lv
+
+sudo rsync -axPS /var/lib/docker/ /path/to/new/docker-data
+sudo systemctl stop docker
+sudo rsync -aHAXx /var/lib/docker/ /mnt/nvme9n1/
+sudo mount /dev/nvme9n1 /var/lib/docker
+sudo systemctl start docker
+
+sudo file -s /dev/nvme2n1
+/dev/nvme2n1: Linux rev 1.0 ext4 filesystem data, UUID=2c8c6897-6926-479c-a14c-4ef2e878d855 (extents) (64bit) (large files) (huge files)
+
+UUID=2c8c6897-6926-479c-a14c-4ef2e878d855 /opt/testing/app ext4 defaults 0 2
+UUID=6d9edf45-45f7-49cb-b8e0-1a1d84abd198 /opt/testing/app1 ext4 defaults 0 2
+
+fio --name=sing-4k --filename=/dev/nvme8n1 --rw=randread --bs=4k  --iodepth=1  --ioengine=io_uring --time_based --runtime=30
+fio --name=sing-4k --filename=/dev/nvme4n1p1 --rw=randread --bs=4k  --iodepth=1  --ioengine=io_uring --time_based --runtime=30
+
+bf_ssd_stressor
+(cmd='taskset -c 0 time fio --rw=read --runtime=2400 --time_based --ioengine=libaio --group_reporting --exitall --filename=/dev/nvme0n1 --name=/dev/nvme0n1 --bs=4096k --numjobs=16 --iodepth=16 --size=1G --loops=1 --invalidate=1 --randrepeat=1 --direct=1 --norandommap', run_on=<RunOn.ARM: 'arm'>)], 'name': 'bf_ssd_stressor', 'logger': <Logger SSD_STRESSOR (INFO)>, 'duration': 2400, 'dut_device': <utils.Device.SetupHostCard object at 0x7f3add0377f0>
+[26/09/2024 01:44:28] SSD_STRESSOR INFO 
+[run on 172.31.60.109]: taskset -c 0 sudo time fio --rw=read --runtime=1800 --time_based --ioengine=libaio --group_reporting --exitall --filename=/dev/nvme0n1 --name=/dev/nvme0n1 --bs=4096k --numjobs=16 --iodepth=16 --size=1G --loops=1 --invalidate=1 --randrepeat=1 --direct=1 --norandommap
+[output]: /dev/nvme0n1: (g=0): rw=read, bs=(R) 4096KiB-4096KiB, (W) 4096KiB-4096KiB, (T) 4096KiB-4096KiB, ioengine=libaio, iodepth=16

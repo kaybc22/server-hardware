@@ -27,7 +27,8 @@ echo "------------------------------------------------------------"
 # Fetch details for each component
 for URI in $MEMBERS; do
   FULL_URI="$BMC_URL$URI"
-  DETAILS=$(curl -skL -u "$USERNAME:$PASSWORD" -X GET "$FULL_URI" 2>/dev/null | jq -r '.Id + "|" + (.Version // "N/A") + "|" + "'"$URI"'"')
+  #DETAILS=$(curl -skL -u "$USERNAME:$PASSWORD" -X GET "$FULL_URI" 2>/dev/null | jq -r '.Id + "|" + (.Version // "N/A") + "|" + "'"$URI"'"')
+  DETAILS=$(curl -skL -u "$USERNAME:$PASSWORD" -X GET "$FULL_URI" 2>/dev/null | jq -r '.Id + "|" + .Version  + "|" + "'"$URI"'"')
   if [ "$DETAILS" != "null|N/A|$URI" ]; then
     # Split DETAILS into Id, Version, URI
     ID=$(echo "$DETAILS" | cut -d'|' -f1)
@@ -40,6 +41,7 @@ for URI in $MEMBERS; do
   fi
 done
 
+
 #GPU FW Update
 #if [ -z "$1" ]; then
 #  echo "Usage: $0 Path to the GPU FW PATH_FW"
@@ -49,8 +51,8 @@ done
 #FW=$1
 #curl -X POST BMC_URL/redfish/v1/UpdateService/upload -H 'content-type: multipart/form-data' -F UpdateFile=@FW -F 'UpdateParameters={"Targets":[""], "@Redfish.OperationApplyTime": "OnReset"}' -u "$USERNAME:$PASSWORD" -k
 #curl -X POST -T nvfw_HGX-B100-B200x8_0009_241104.1.2_a_custom_prod-signed.fwpkg -kv -u "user:passwd" BMC_URL/redfish/v1/Oem/Supermicro/HGX_B200/UpdateService/
--X POST -H "Content-Type: application/json" --data "{ \"ImageURI\" : \"http://%SERVER_IP%/Nvidia.fwpkg\" , \"TransferProtocol\" : \"HTTP\", [\"/redfish/v1/UpdateService/FirmwareInventory/HGX_FW_BMC_0\"]"
-redfish/v1/UpdateService/FirmwareInventory/HGX_FW_PCIeRetimer_0
+#-X POST -H "Content-Type: application/json" --data "{ \"ImageURI\" : \"http://%SERVER_IP%/Nvidia.fwpkg\" , \"TransferProtocol\" : \"HTTP\", [\"/redfish/v1/UpdateService/FirmwareInventory/HGX_FW_BMC_0\"]"
+#redfish/v1/UpdateService/FirmwareInventory/HGX_FW_PCIeRetimer_0
 
 
 

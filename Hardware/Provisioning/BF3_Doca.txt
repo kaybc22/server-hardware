@@ -1,0 +1,82 @@
+
+https://content.mellanox.com/BlueField/BFBs/Ubuntu22.04/bf-bundle-2.10.0-147_25.01_ubuntu-22.04_prod.bfb
+wget https://content.mellanox.com/BlueField/BFBs/Ubuntu22.04/bf-bundle-3.0.0-135_25.04_ubuntu-22.04_prod.bfb
+echo -e "device=/dev/mmcblk0\nWITH_NIC_FW_UPDATE=yes" > bf.cfg
+for i in $(ls /dev/ | grep -i rsh) ; do echo $i ; bfb-install --bfb bf-bundle-2.10.0-147_25.01_ubuntu-22.04_prod.bfb  --password Super123456 --rshim $i ; done
+for i in $(ls /dev/ | grep -i rsh) ; do echo $i ; bfb-install --bfb bf-bundle-2.10.0-147_25.01_ubuntu-22.04_prod.bfb  --password Super123456 --rshim $i ; done
+multi-bfb-install --bfb bf-bundle-2.10.0-147_25.01_ubuntu-22.04_prod.bfb --password Supermicro1234
+--password Super123456
+--config bf.cfg
+
+systemctl stop rshim; systemctl start rshim
+wget https://content.mellanox.com/BlueField/BFBs/Ubuntu22.04/bf-bundle-3.0.0-135_25.04_ubuntu-22.04_prod.bfb
+echo -e "device=/dev/mmcblk0\nWITH_NIC_FW_UPDATE=yes" > bf.cfg
+for i in {0,1,2,5,7,8,9}; do bfb-install --bfb bf-bundle-2.10.0-147_25.01_ubuntu-22.04_prod.bfb -c bf.cfg --rshim rshim$i; done
+for i in $(ls /dev/ | grep -i rshim); do bfb-install --bfb bf-bundle-2.10.0-147_25.01_ubuntu-22.04_prod.bfb -c bf.cfg --rshim rshim$i; done
+
+https://content.mellanox.com/BlueField/FW-Bundle/bf-fwbundle-3.1.0-82_25.07-prod.bfb
+
+device=/dev/mmcblk0
+ubuntu_PASSWORD="GPUthermal123"
+
+https://content.mellanox.com/BlueField/BFBs/Ubuntu22.04/bf-bundle-2.10.0-147_25.01_ubuntu-22.04_prod.bfb
+
+
+screen /dev/rshim0/console 115200
+172.31.49.101 one/1234, sudo minicom 115200 -D /dev/ttyUSB0
+ 
+minicom -D /dev/rshim0/console -b 115200 --color=on
+screen /dev/rshim0/console 115200
+cat /dev/rshim1/misc
+
+for i in $(screen -ls | grep -i $(hostname) | awk '{print $1}'); do echo $i; screen -X -S $i  quit; done
+
+for i in {0..7};do echo "BOOT_TIMEOUT 200" > /dev/rshim$i/misc; done
+for i in {0..7};do grep "DEV_NAME " /dev/rshim$i/misc; done
+
+for i in {0..7};do grep "DEV_NAME " /dev/rshim$i/misc | awk '{print $2}'; done
+rshim -d <device name> -i 0 &
+
+
+1. mlxlink -d  /dev/mst/mt41692_pciconf0   -m -c 
+2. mget_temp -d /dev/mst/mt41692_pciconf0
+3. mlxlink -m -d /dev/mst/mt41692_pciconf0
+4. mlxlink  -d /dev/mst/mt41692_pciconf0 --cable --dump > eerpmom.txt
+5. mstdump   /dev/mst/mt41692_pciconf0  > mstdump.txt
+6. flint -d  /dev/mst/mt41692_pciconf0 q full
+
+mlxconfig -d /dev/mst/mt4129_pciconf1 q | grep -i Link
+ibstat
+ibstatus mlx5_0 active
+ibstatus mlx5_0 | grep 'state'
+mlxlink
+mlxlink -d /dev/mst/mt41692_pciconf0 -m
+ibv_devinfo -d mlx5_3
+mget_temp -d 18:00.0
+flint
+
+In switches:   mlxlink -d <device> -p <portt#>  -m -c
+
+iperf -B 192.168.1.105 -c 192.168.1.104 -w 512k -l 128k -p 5001 -i 1 -t 3600
+
+mlxlink -d  /dev/mst/mt41692_pciconf0   -m -c | egrep -i "MAX Power|Temperature|State|Recommendation" 
+mlxlink -d /dev/mst/mt41692_pciconf0 -m -c | awk '/MAX Power|Temperature|State|Recommendation/{print "/dev/mst/mt41692_pciconf0: "$0}'
+echo "/dev/mst/mt41692_pciconf0" && mlxlink -d /dev/mst/mt41692_pciconf0 -m -c | egrep -i "MAX Power|Temperature|State|Recommendation"
+
+To reset configuration             : mlxconfig -d /dev/mst/mt4099_pciconf0 reset
+after reset, make sure ACS is disabled for ALL NICs
+ibv_devinfo -d mlx5_6 | grep -i 'link_layer' -m1 | awk '{print $2}'
+ethernet
+
+
+for i in {0..9}; do cat /dev/rshim$i/misc; done
+for i in {0..7}; do cat /dev/rshim$i/misc | grep -i name | awk '{print $2}'; done
+for i in {0..7}; do echo /dev/rshim$i/misc ; cat /dev/rshim$i/misc | awk '{print $0}'; done
+for i in {0..7}; do echo /dev/rshim$i/misc ; cat /dev/rshim$i/misc | grep -i name | awk '{print $2}'; done
+
+function check_cable(){
+mst cable add
+#mst status -v | grep  cable
+for i in $(mst status -v | grep  cable); do mlxcables -d $i; done
+}
+mlxcables -q
