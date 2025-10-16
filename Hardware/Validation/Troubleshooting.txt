@@ -1,14 +1,49 @@
 #nvcc cuda_check.cu -o cuda_check
 #CUDA_VISIBLE_DEVICES=0,2,3,4,5,6,7 ./cuda_check
-#sudo nvidia-smi -q -i 1 1 -c  -d 
+#sudo nvidia-smi -q 
+
+#FD_200
+
+(1)check for the error message --> (2) go to the folder check for exception to confirm issue check for Error code in (fd_sum/output) to determine the next steps --> if point to GPU or NVs, go to that folder and repeats (2). 
+++++++++++
+MODS-000000000143 | connectivity       | connectivity | nvlink     | GPU, PCIE, Nvlink, I2C |                        | PCI Express bus error
+MODS-000000000143 | gpumem             | gpumem       |            | GPU                    | SXM2_SN_1652xxxxxxxxx  | PEX error threshold exceeded.
+gpumem             --->  SXM2_SN_1652xxxxxx
+
+connectivity folder
+connectivity folder --> exception (confirm there is an issue) |--> FD_sum (Error Code)             ---> GPU# --> exception   --> |--> FD_sum (Error Code) 
+                                                              |--> output (Error Code)                      ---> Error Code      |--> output
+                                                              |**--> if >2 fabricmanager or nvlsm 
+
 
 #GPU issue
-systemctl stop *nvidia* #sudo rmmod nvidia_uvm nvidia_drm nvidia_modeset nvidia
-echo 1 | sudo tee /sys/bus/pci/devices/0000\:1a\:00.0/remove
+ 
+systemctl stop *nvidia*
+ps -ef | grep -i nvidia
+lsof | grep -i nvidia
 
+sudo rmmod nvidia_uvm nvidia_drm nvidia_modeset nvidia
+lsof /dev/nvidia* | awk '{print $2}' | grep -E '^[0-9]+$' | sort -u | xargs -r kill -9 #none of service using the GPU
+
+#remove driver
+echo -n "0000:3b:00.0" > /sys/bus/pci/drivers/nvidia/unbind #NVRM: Continuing with GPU removal for device 0000:3b:00.0 (no longer know the GPU/ /sys/bus/pci/drivers/nvidia)
+echo -n "0000:3b:00.0" > /sys/bus/pci/drivers/nvidia/bind
+
+#drop from the pcie
+echo 1 | sudo tee /sys/bus/pci/devices/0000\:1a\:00.0/remove
 echo 1 | sudo tee /sys/bus/pci/rescan
 
-sudo apt install hwloc -y
-lstopo --output-format png > lstopo.png
+#status
+ls /sys/bus/pci/devices/0000:3b:00.0/power
+cat /sys/bus/pci/devices/0000:3b:00.0/power_state /aer_dev_fatal /current_link_width
+
+
+hexdump -C /sys/bus/pci/devices/0000\:3b\:00.0/config
+
+echo -n "0000:29:00.0" > /sys/bus/pci/drivers/mlx5_core/unbind
+echo -n "0000:29:00.0" >  /sys/bus/pci/drivers/mlx5_core/bind
+
+
+
 
 

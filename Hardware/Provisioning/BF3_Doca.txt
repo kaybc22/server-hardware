@@ -2,10 +2,10 @@
 https://content.mellanox.com/BlueField/BFBs/Ubuntu22.04/bf-bundle-2.10.0-147_25.01_ubuntu-22.04_prod.bfb
 wget https://content.mellanox.com/BlueField/BFBs/Ubuntu22.04/bf-bundle-3.0.0-135_25.04_ubuntu-22.04_prod.bfb
 echo -e "device=/dev/mmcblk0\nWITH_NIC_FW_UPDATE=yes" > bf.cfg
-for i in $(ls /dev/ | grep -i rsh) ; do echo $i ; bfb-install --bfb bf-bundle-2.10.0-147_25.01_ubuntu-22.04_prod.bfb  --password Super123456 --rshim $i ; done
-for i in $(ls /dev/ | grep -i rsh) ; do echo $i ; bfb-install --bfb bf-bundle-2.10.0-147_25.01_ubuntu-22.04_prod.bfb  --password Super123456 --rshim $i ; done
-multi-bfb-install --bfb bf-bundle-2.10.0-147_25.01_ubuntu-22.04_prod.bfb --password Supermicro1234
---password Super123456
+for i in $(ls /dev/ | grep -i rsh) ; do echo $i ; bfb-install --bfb bf-bundle-2.10.0-147_25.01_ubuntu-22.04_prod.bfb  --password $PASS --rshim $i ; done
+for i in $(ls /dev/ | grep -i rsh) ; do echo $i ; bfb-install --bfb bf-bundle-2.10.0-147_25.01_ubuntu-22.04_prod.bfb  --password $PASS --rshim $i ; done
+multi-bfb-install --bfb bf-bundle-2.10.0-147_25.01_ubuntu-22.04_prod.bfb --password $PASS
+--password $PASS
 --config bf.cfg
 
 systemctl stop rshim; systemctl start rshim
@@ -17,7 +17,7 @@ for i in $(ls /dev/ | grep -i rshim); do bfb-install --bfb bf-bundle-2.10.0-147_
 https://content.mellanox.com/BlueField/FW-Bundle/bf-fwbundle-3.1.0-82_25.07-prod.bfb
 
 device=/dev/mmcblk0
-ubuntu_PASSWORD="GPUthermal123"
+ubuntu_PASSWORD="$PASS"
 
 https://content.mellanox.com/BlueField/BFBs/Ubuntu22.04/bf-bundle-2.10.0-147_25.01_ubuntu-22.04_prod.bfb
 
