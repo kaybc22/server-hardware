@@ -2,6 +2,7 @@
 #CUDA_VISIBLE_DEVICES=0,2,3,4,5,6,7 ./cuda_check
 #sudo nvidia-smi -q 
 
+
 #FD_200
 
 (1)check for the error message --> (2) go to the folder check for exception to confirm issue check for Error code in (fd_sum/output) to determine the next steps --> if point to GPU or NVs, go to that folder and repeats (2). 
@@ -34,7 +35,7 @@ echo 1 | sudo tee /sys/bus/pci/devices/0000\:1a\:00.0/remove
 echo 1 | sudo tee /sys/bus/pci/rescan
 
 #status
-ls /sys/bus/pci/devices/0000:3b:00.0/power
+ls /sys/bus/pci/devices/0000:3b:00.0/power/control /runtime_status /runtime_usage
 cat /sys/bus/pci/devices/0000:3b:00.0/power_state /aer_dev_fatal /current_link_width
 
 
@@ -43,7 +44,62 @@ hexdump -C /sys/bus/pci/devices/0000\:3b\:00.0/config
 echo -n "0000:29:00.0" > /sys/bus/pci/drivers/mlx5_core/unbind
 echo -n "0000:29:00.0" >  /sys/bus/pci/drivers/mlx5_core/bind
 
+#disable hung task if possible
+echo 0 > /proc/sys/kernel/hung_task_timeout_secs
+
+
+time nvidia-smi
+real    0m0.515s
+user    0m0.002s
+sys     0m0.468s
+time nvidia-smi -q | grep -i vbios
+real    0m1.133s
+user    0m0.028s
+sys     0m0.753s
 
 
 
 
+#Check system
+Component                           | Details
+================================================================================
+Vulkan Info                         | None
+--------------------------------------------------------------------------------
+NVIDIA SMI                          | NVIDIA-SMI version  : 570.133.20
+                                    | NVML version        : 570.133
+                                    | DRIVER version      : 570.133.20
+                                    | CUDA Version        : 12.8
+--------------------------------------------------------------------------------
+NVIDIA Settings                     | 
+                                    | nvidia-settings:  version 575.51.03
+                                    |   The NVIDIA Settings tool.
+--------------------------------------------------------------------------------
+NVIDIA Fabric Manager               | Fabric Manager version is : 570.133.20
+--------------------------------------------------------------------------------
+NVIDIA Subnet Manager               | None
+--------------------------------------------------------------------------------
+Mellanox Link                       | mlxlink, mft 4.33.0-169, built on Jul 24 2025, 16:49:46. Git SHA Hash: N/A
+--------------------------------------------------------------------------------
+InfiniBand Status                   | ibstat BUILD VERSION: 39.0
+--------------------------------------------------------------------------------
+InfiniBand Network Discovery        | ibnetdiscover BUILD VERSION: 39.0
+--------------------------------------------------------------------------------
+NVIDIA MSE/NETIR Versions           | None
+--------------------------------------------------------------------------------
+NVIDIA GPU Details                  | NVIDIA B200, 570.133.20, 183359 MiB, 97.00.88.00.0F, 00000000:1A:00.0, 1651625050300
+NVIDIA NIC Details                  | Device      : mlx5_0
+                                    | Firmware Ver: 28.42.1280
+--------------------------------------------------------------------------------
+OS Details                          | Distribution : Ubuntu 22.04.2 LTS
+                                    | Kernel       : 5.15.0-139-generic
+                                    | Hostname     : b200
+                                    | Architecture : x86_64
+                                    | Uptime       : up 17 minutes
+
+Loading driver
+journalctl -b -0
+journalctl -b -1
+journalctl -b -2
+Oct 15 23:12:30 b200 kernel: [drm] [nvidia-drm] [GPU ID 0x00001a00] Loading driver
+Oct 15 23:12:30 b200 kernel: NVRM: nvCheckOkFailedNoLog: Check failed: Generic Error: Invalid state [NV_ERR_INVALID_STATE] (0x00000040) returned from pRmApi->Control(pRmApi, pGpu->hInternalClient, pGpu->hInternalSubdevice, NV2080_CTRL_CMD_NVLINK_GET_POWER_STATE, &powerStatusParams, sizeof(powerStatusParams)) @ gpu_fabric_probe.c:813
+Oct 15 23:12:30 b200 kernel: NVRM: nvCheckOkFailedNoLog: Check failed: Generic Error: Invalid state [NV_ERR_INVALID_STATE] (0x00000040) returned from pRmApi->Control(pRmApi, pGpu->hInternalClient, pGpu->hInternalSubdevice, NV2080_CTRL_CMD_NVLINK_GET_POWER_STATE, &powerStatusParams, sizeof(powerStatusParams)) @ gpu_fabric_probe.c:813

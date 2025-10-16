@@ -1,0 +1,202 @@
+GPU 0: NVIDIA B200 (UUID: GPU-cd829a39-7e8d-3538-558c-53d2fe5df121)
+GPU 1: NVIDIA B200 (UUID: GPU-4e42833b-192f-cfe0-00c8-2bf3789b7d0a)
+GPU 2: NVIDIA B200 (UUID: GPU-86575866-7642-0ffb-67db-1cba9c0b3f1c)
+GPU 3: NVIDIA B200 (UUID: GPU-9ae2ecde-097f-4583-d607-ba8e8cac4fe4)
+GPU 4: NVIDIA B200 (UUID: GPU-051a914c-604b-831e-fe19-669bdeb79e0a)
+GPU 5: NVIDIA B200 (UUID: GPU-1c5ba284-e438-2719-16e2-5ba5c833df52)
+GPU 6: NVIDIA B200 (UUID: GPU-e7528223-0f1e-562f-bd5e-49ec63cab8ec)
+GPU 7: NVIDIA B200 (UUID: GPU-5e201f97-fb74-30ca-b375-4dd69f5fa4a2)
+=====FP8=====  
+
+=========================================================
+================= NVIDIA HPC Benchmarks =================
+=========================================================
+NVIDIA Release 25.04
+Copyright (c) 2023, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+
+Various files include modifications (c) NVIDIA CORPORATION & AFFILIATES.  All rights reserved.
+
+This container image and its contents are governed by the NVIDIA Deep Learning Container License.
+By pulling and using the container, you accept the terms and conditions of this license:
+https://developer.nvidia.com/ngc/nvidia-deep-learning-container-license
+
+NOTE: Mellanox network driver detected, but NVIDIA peer memory driver not
+      detected.  Multi-node communication performance may be reduced.
+
+
+================================================================================
+HPL-MxP-NVIDIA 25.4.0  -- NVIDIA accelerated HPL-MxP benchmark benchmark -- NVIDIA
+================================================================================
+
+ ****** HPL MxP Settings ****** 
+
+   --nprow =  4 
+   --npcol =  2 
+   --order = row 
+   --n     = 90000 
+   --nb    = 4096 
+   --tolerance                        = 1.000000e-12 
+   --test-loop                        = 1 
+   --preset-gemm-kernel               = 100 
+   --u-panel-chunk-nbs                = 8 
+   --call-dgemv-with-multiple-threads = 0 
+   --prioritize-trsm                  = 0 
+   --prioritize-factorization         = 1 
+   --use-separate-stream-for-gemm     = 1 
+   --use-mpi-panel-broadcast          = 50 
+   --mpi-use-host-threads             = 1 
+   --sloppy-type                      = 1 
+   --Anq-device                       = 0 
+   --cuda-host-register-step          = 2048 
+   --mpi-use-mpi                      = 1 
+   --use-host-mpi                     = 0 
+   --fill-device                      = 0 
+   --fill-device-buffer-size          = 3048 
+
+
+
+ ****** Monitor GPU Settings ****** 
+
+   --monitor-gpu                      = 0 
+
+
+
+ ****** test 1 of 1 starts ****** 
+
+   n      = 90000
+   nb     = 4096
+   nprow  = 4
+   npcol  = 2
+
+Device info:
+	Peak clock frequency 1965 MHz
+	SM 100
+	Number of SMs 148
+	Total memory available 178.35 GB
+
+---------------------------------------------------------------------------------------------
+[34m Per process host memory consumption MAX = 8.251 GB, available MIN = 215.114 GB[0m
+---------------------------------------------------------------------------------------------
+
+---------------------------------------------------------------------------------------------
+[34m Per process device memory consumption MAX = 6.111 GB, available MIN = 177.172 GB[0m
+---------------------------------------------------------------------------------------------
+
+Constructor seconds: AVG = 0.08, MAX = 0.09 (7->c3bb9ff853d8), MIN = 0.07 (4->c3bb9ff853d8)
+
+
+ ****** Testing HPL MxP components ****** 
+
+GEMM seconds: AVG = 0.23, MAX = 0.25 (2->c3bb9ff853d8), MIN = 0.21 (7->c3bb9ff853d8)
+
+GEMM GFLOPS: AVG = 1784263.07, MAX = 1831914.06 (1->c3bb9ff853d8), MIN = 1737407.08 (6->c3bb9ff853d8)
+
+MPI U broadcast seconds: AVG = 1.18, MAX = 1.19 (3->c3bb9ff853d8), MIN = 1.18 (2->c3bb9ff853d8)
+
+MPI U broadcast GFLOPS: AVG = 11.33, MAX = 11.40 (2->c3bb9ff853d8), MIN = 11.24 (3->c3bb9ff853d8)
+
+MPI U broadcast seconds: AVG = 1.19, MAX = 1.21 (2->c3bb9ff853d8), MIN = 1.18 (5->c3bb9ff853d8)
+
+MPI U broadcast GFLOPS: AVG = 11.24, MAX = 11.35 (5->c3bb9ff853d8), MIN = 11.11 (2->c3bb9ff853d8)
+
+NCCL U broadcast seconds: AVG = 0.03, MAX = 0.03 (0->c3bb9ff853d8), MIN = 0.02 (6->c3bb9ff853d8)
+
+NCCL U broadcast GFLOPS: AVG = 521.61, MAX = 540.29 (6->c3bb9ff853d8), MIN = 424.89 (0->c3bb9ff853d8)
+
+MPI U Sendrecv seconds: AVG = 0.73, MAX = 0.73 (0->c3bb9ff853d8), MIN = 0.73 (3->c3bb9ff853d8)
+
+MPI U Sendrecv GFLOPS: AVG = 18.39, MAX = 18.39 (3->c3bb9ff853d8), MIN = 18.38 (0->c3bb9ff853d8)
+
+MPI L2 broadcast seconds: AVG = 0.72, MAX = 0.84 (5->c3bb9ff853d8), MIN = 0.59 (2->c3bb9ff853d8)
+
+MPI L2 broadcast GFLOPS: AVG = 26.81, MAX = 33.82 (2->c3bb9ff853d8), MIN = 19.88 (5->c3bb9ff853d8)
+
+NCCL L2 broadcast seconds: AVG = 0.02, MAX = 0.02 (1->c3bb9ff853d8), MIN = 0.02 (4->c3bb9ff853d8)
+
+NCCL L2 broadcast GFLOPS: AVG = 541.75, MAX = 547.54 (4->c3bb9ff853d8), MIN = 535.71 (7->c3bb9ff853d8)
+
+MPI L2 Sendrecv seconds: AVG = 0.66, MAX = 0.71 (1->c3bb9ff853d8), MIN = 0.62 (6->c3bb9ff853d8)
+
+MPI L2 Sendrecv GFLOPS: AVG = 28.11, MAX = 30.59 (2->c3bb9ff853d8), MIN = 26.48 (5->c3bb9ff853d8)
+
+pdgemv seconds: AVG = 1.53, MAX = 2.02 (0->c3bb9ff853d8), MIN = 1.22 (4->c3bb9ff853d8)
+
+pdgemv GFLOPS: AVG = 1.35, MAX = 1.51 (4->c3bb9ff853d8), MIN = 1.09 (1->c3bb9ff853d8)
+
+
+ ****** Matrix Generation ****** 
+
+---------------------------------------------------------------------------------------------
+[34m Per process memory available MIN system = 214.848 GB, device = 169.726 GB[0m
+---------------------------------------------------------------------------------------------
+
+RNG seconds: AVG = 5.69, MAX = 6.73 (0->c3bb9ff853d8), MIN = 5.31 (7->c3bb9ff853d8)
+
+Set Diagonal seconds: AVG = 0.00, MAX = 0.01 (7->c3bb9ff853d8), MIN = 0.00 (5->c3bb9ff853d8)
+
+Get Anorm seconds: AVG = 0.00, MAX = 0.00 (5->c3bb9ff853d8), MIN = 0.00 (0->c3bb9ff853d8)
+
+---------------------------------------------------------------------------------------------
+[34m Per process memory available MIN system = 207.371 GB, device = 169.726 GB[0m
+---------------------------------------------------------------------------------------------
+
+Sp seconds: AVG = 6.46, MAX = 6.46 (2->c3bb9ff853d8), MIN = 6.46 (0->c3bb9ff853d8)
+
+matgen seconds: AVG = 13.21, MAX = 13.21 (0->c3bb9ff853d8), MIN = 13.21 (6->c3bb9ff853d8)
+
+
+ ****** test loop 1 of 1 starts ****** 
+
+2025-10-16 22:07:07.743
+[0;31m Prog=  24.90% N_left=    81808 Time=     0.72 Time_left=       2.17 iTF=     167.90 TF=   167.90 iTF_per=    20.99 TF_per=    20.99[0m
+[0;31m Prog=  35.62% N_left=    77712 Time=     0.78 Time_left=       1.42 iTF=     823.37 TF=   220.83 iTF_per=   102.92 TF_per=    27.60[0m
+[0;31m Prog=  45.27% N_left=    73616 Time=     0.80 Time_left=       0.97 iTF=    2450.68 TF=   273.98 iTF_per=   306.33 TF_per=    34.25[0m
+[0;31m Prog=  53.91% N_left=    69520 Time=     0.82 Time_left=       0.70 iTF=    2542.60 TF=   319.67 iTF_per=   317.83 TF_per=    39.96[0m
+[0;31m Prog=  61.59% N_left=    65424 Time=     0.84 Time_left=       0.52 iTF=    1978.08 TF=   356.97 iTF_per=   247.26 TF_per=    44.62[0m
+[0;31m Prog=  68.36% N_left=    61328 Time=     0.85 Time_left=       0.39 iTF=    2222.01 TF=   389.35 iTF_per=   277.75 TF_per=    48.67[0m
+[0;31m Prog=  74.28% N_left=    57232 Time=     0.87 Time_left=       0.30 iTF=    2167.49 TF=   416.61 iTF_per=   270.94 TF_per=    52.08[0m
+[0;31m Prog=  79.42% N_left=    53136 Time=     0.88 Time_left=       0.23 iTF=    1981.36 TF=   439.03 iTF_per=   247.67 TF_per=    54.88[0m
+[0;31m Prog=  83.82% N_left=    49040 Time=     0.89 Time_left=       0.17 iTF=    1497.14 TF=   455.95 iTF_per=   187.14 TF_per=    56.99[0m
+[0;31m Prog=  87.55% N_left=    44944 Time=     0.89 Time_left=       0.13 iTF=   15096.94 TF=   475.57 iTF_per=  1887.12 TF_per=    59.45[0m
+[0;31m Prog=  90.65% N_left=    40848 Time=     0.90 Time_left=       0.09 iTF=    1678.49 TF=   487.54 iTF_per=   209.81 TF_per=    60.94[0m
+[0;31m Prog=  93.19% N_left=    36752 Time=     0.91 Time_left=       0.07 iTF=    8989.85 TF=   500.44 iTF_per=  1123.73 TF_per=    62.55[0m
+[0;31m Prog=  95.22% N_left=    32656 Time=     0.92 Time_left=       0.05 iTF=     767.74 TF=   504.18 iTF_per=    95.97 TF_per=    63.02[0m
+[0;31m Prog=  96.80% N_left=    28560 Time=     0.92 Time_left=       0.03 iTF=    6761.21 TF=   511.92 iTF_per=   845.15 TF_per=    63.99[0m
+[0;31m Prog=  97.99% N_left=    24464 Time=     0.93 Time_left=       0.02 iTF=     473.00 TF=   511.41 iTF_per=    59.12 TF_per=    63.93[0m
+[0;31m Prog=  98.84% N_left=    20368 Time=     0.93 Time_left=       0.01 iTF=    5699.66 TF=   515.45 iTF_per=   712.46 TF_per=    64.43[0m
+[0;31m Prog=  99.41% N_left=    16272 Time=     0.94 Time_left=       0.01 iTF=     223.46 TF=   511.63 iTF_per=    27.93 TF_per=    63.95[0m
+[0;31m Prog=  99.75% N_left=    12176 Time=     0.95 Time_left=       0.00 iTF=    1568.44 TF=   512.81 iTF_per=   196.06 TF_per=    64.10[0m
+[0;31m Prog=  99.93% N_left=     8080 Time=     0.98 Time_left=       0.00 iTF=      22.74 TF=   494.14 iTF_per=     2.84 TF_per=    61.77[0m
+[0;31m Prog=  99.99% N_left=     3984 Time=     0.98 Time_left=       0.00 iTF=    7397.51 TF=   494.43 iTF_per=   924.69 TF_per=    61.80[0m
+2025-10-16 22:07:08.828
+LU seconds: AVG = 1.08, MAX = 1.09 (3->c3bb9ff853d8), MIN = 1.08 (1->c3bb9ff853d8)
+
+Solver iteration  0, L-infinite residual = 2.90524829e-03
+Solver iteration  1, L-infinite residual = 9.21561136e-09
+Solver iteration  2, L-infinite residual = 6.30606678e-14
+Iterative Solver seconds: AVG = 2.42, MAX = 2.42 (6->c3bb9ff853d8), MIN = 2.42 (0->c3bb9ff853d8)
+
+2025-10-16 22:07:11.253
+
+ ****** HPL MxP Result    ****** 
+
+    EPS           . . . . . . . . . . . . . . . . .          =    2.000000E-16
+    Threshold     . . . . . . . . . . . . . . . . .          =    1.600000E+01
+  ||Ax-b||_oo     . . . . . . . . . . . . . . . . .          =    6.306067E-14
+  ||A   ||_oo     . . . . . . . . . . . . . . . . .          =    9.078403E+04
+  ||x   ||_oo     . . . . . . . . . . . . . . . . .          =    2.236614E-05
+  ||b   ||_oo     . . . . . . . . . . . . . . . . .          =    9.999876E-01
+  ||Ax-b||_oo / (EPS * (||A||_oo * ||x||_oo + ||b||_oo) * N) =    1.156046E-03 ...... PASSED
+
+    N = 90000, NB = 4096, NPROW = 4, NPCOL = 2, SLOPPY-TYPE = 1
+[0;31m       GFLOPS = 1.3847e+05, per GPU =   17308.58[0m[0;34m ------ The HPL-MxP performance to report[0m
+    LU GFLOPS = 4.4769e+05, per GPU =   55961.48[0;34m ------ The performance excluding the iterative solver part[0m
+
+ ****** HPL MxP Result    ****** 
+
+
+ ****** test loop 1 of 1 done   ****** 
+
+
+ ****** test 1 of 1 done   ****** 
+

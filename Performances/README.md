@@ -74,21 +74,35 @@ export TP=<number of GPUs: 1,2,4,8>
 export PP=<for this benchmark, PP is set to 1>
 export QUANTIZATION=<NVFP4 for FP4 and NVFP8 for FP8>
 
+#download model inside the container
+docker run -it --gpus all --shm-size 128g -v  /opt/testing/perf/:/app/tensorrt_llm --entrypoint /bin/bash tensorrt_llm/release:latest
+
 # Download checkpoints from Huggingface
 huggingface-cli login --token hf auth login --token ${HF_TOKEN} --add-to-git-credential
 huggingface-cli login --token ${HF_TOKEN}
 export HF_HOME=/tmp/HF
 huggingface-cli download meta-llama/Llama-3.1-70B
+git clone https://huggingface.co/meta-llama/Llama-3.1-70B
+git clone https://huggingface.co/meta-llama/Llama-4-Scout-17B-16E-Instruct
+
 
 # Prepare dataset with NUM_REQUESTS, ISL and OSL
-python /app/tensorrt_llm/benchmarks/cpp/prepare_dataset.py --stdout --tokenizer=meta-llama/Llama-3.1-70B token-norm-dist --num-requests=${NUM_REQUESTS} --input-mean=${ISL} --output-mean=${OSL} --input-stdev=0 --output-stdev=0 > /tmp/dataset.txt
-
 # For example, to run ISL:OSL = 128:128, choose num_requests = 30000 from the above link
 python /app/tensorrt_llm/benchmarks/cpp/prepare_dataset.py --stdout --tokenizer=meta-llama/Llama-3.1-70B token-norm-dist --num-requests=30000 --input-mean=128 --output-mean=128 --input-stdev=0 --output-stdev=0 > /tmp/dataset.txt
 
++python /app/tensorrt_llm/benchmarks/cpp/prepare_dataset.py --stdout --tokenizer=meta-llama/Llama-3.1-70B token-norm-dist --num-requests=${NUM_REQUESTS} --input-mean=${ISL} --output-mean=${OSL} --input-stdev=0 --output-stdev=0 > /tmp/dataset.txt
+python /app/tensorrt_llm/benchmarks/cpp/prepare_dataset.py --stdout --tokenizer=. token-norm-dist --num-requests=20000 --input-mean=2048 --output-mean=2048 --input-stdev=0 --output-stdev=0 > /app/tensorrt_llm/dataset_20000_2048.txt
+
+
+
 # Build and run engine with TP and PP
-trtllm-bench --workspace /tmp/Llama-3.1-70B --model meta-llama/Llama-3.1-70B build --tp_size ${TP} --pp_size ${PP} --dataset /tmp/dataset.txt --quantization ${QUANTIZATION}
-trtllm-bench --model meta-llama/Llama-3.1-70B throughput --dataset /tmp/dataset.txt --engine_dir /tmp/Llama-3.1-70B/meta-llama/Llama-3.1-70B/tp_${TP}_pp_${PP} --kv_cache_free_gpu_mem_fraction 0.95
++trtllm-bench --workspace /tmp/Llama-3.1-70B --model meta-llama/Llama-3.1-70B build --tp_size ${TP} --pp_size ${PP} --dataset /tmp/dataset.txt --quantization ${QUANTIZATION} #not FB4 NVFB4 for B200
+trtllm-bench --workspace /tmp/Llama-3.1-70B --model /app/tensorrt_llm build --tp_size 8 --pp_size 1 --dataset /app/tensorrt_llm/dataset.txt --quantization FP8
+trtllm-bench --workspace /tmp/Llama-3.1-70B --model /app/tensorrt_llm build --tp_size 4 --pp_size 1 --dataset /app/tensorrt_llm/dataset.txt --quantization FP8
+
++trtllm-bench --model meta-llama/Llama-3.1-70B throughput --dataset /tmp/dataset.txt --engine_dir /tmp/Llama-3.1-70B/meta-llama/Llama-3.1-70B/tp_${TP}_pp_${PP} --kv_cache_free_gpu_mem_fraction 0.95
+trtllm-bench --model dummy  --model_path /app/tensorrt_llm   --workspace /tmp/Llama-3.1-70B   throughput   --dataset /app/tensorrt_llm/dataset.txt   --engine_dir /app/tensorrt_llm/tp_8_pp_1   --kv_cache_free_gpu_mem_fraction 0.95
+trtllm-bench --model dummy  --model_path /app/tensorrt_llm   --workspace /tmp/Llama-3.1-70B   throughput   --dataset /app/tensorrt_llm/dataset_20000_2048.txt   --engine_dir /app/tensorrt_llm/tp_8_pp_1   --kv_cache_free_gpu_mem_fraction 0.95
 
 
 +Dev: docker run --rm -it --gpus all nvcr.io/nvidia/nvhpc:25.7-devel-cuda12.9-ubuntu22.04 /bin/bash
@@ -104,4 +118,5 @@ docker run --rm --gpus all -v /opt/nvidia/hpc_sdk/Linux_x86_64/25.7/examples/Ope
 docker run --rm -it --gpus all nvcr.io/nvidia/hpc-benchmarks:25.04  /bin/bash
 
 
-
+An IOMMU (Input-Output Memory Management Unit) is a hardware component that translates virtual addresses used by I/O devices into physical addresses, similar to how a CPU's MMU handles CPU addresses. It provides memory protection for devices using Direct Memory Access (DMA), 
+enhances security by protecting against malicious devices, and is crucial for device passthrough in virtualization to allow virtual machines to use hardware like GPUs directly
