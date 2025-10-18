@@ -1,6 +1,12 @@
-#nvcc cuda_check.cu -o cuda_check
-#CUDA_VISIBLE_DEVICES=0,2,3,4,5,6,7 ./cuda_check
-#sudo nvidia-smi -q 
+#OS info
+apt install -y sosreport
+https://github.com/sosreport/sos.git
+
+#GPU and System logs
+nvidia-bug-report.sh
+
+#System & NIC logs 
+sysinfo-snapshot.py
 
 
 #FD_200
@@ -103,3 +109,9 @@ journalctl -b -2
 Oct 15 23:12:30 b200 kernel: [drm] [nvidia-drm] [GPU ID 0x00001a00] Loading driver
 Oct 15 23:12:30 b200 kernel: NVRM: nvCheckOkFailedNoLog: Check failed: Generic Error: Invalid state [NV_ERR_INVALID_STATE] (0x00000040) returned from pRmApi->Control(pRmApi, pGpu->hInternalClient, pGpu->hInternalSubdevice, NV2080_CTRL_CMD_NVLINK_GET_POWER_STATE, &powerStatusParams, sizeof(powerStatusParams)) @ gpu_fabric_probe.c:813
 Oct 15 23:12:30 b200 kernel: NVRM: nvCheckOkFailedNoLog: Check failed: Generic Error: Invalid state [NV_ERR_INVALID_STATE] (0x00000040) returned from pRmApi->Control(pRmApi, pGpu->hInternalClient, pGpu->hInternalSubdevice, NV2080_CTRL_CMD_NVLINK_GET_POWER_STATE, &powerStatusParams, sizeof(powerStatusParams)) @ gpu_fabric_probe.c:813
+
+
+dpkg -S $(which sysinfo-snapshot.py)
+ofed-scripts: /usr/sbin/sysinfo-snapshot.py
+dpkg -S ofed-scripts
+apt show ofed-scripts
