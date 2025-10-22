@@ -120,4 +120,14 @@ curl -skL -u "user:passwd" -X GET bmc_ip/redfish/v1/Managers/HGX_BMC_0 | python 
 curl -skL -u "user:passwd" -X GET bmc_ip/redfish/v1/Systems/HGX_Baseboard_0/Processors/GPU_SXM_8/  
 curl -skL -u "user:passwd" -X GET bmc_ip/redfish/v1/Systems/HGX_Baseboard_0/Memory/GPU_SXM_8_DRAM_0 
 curl -skL -u "user:passwd" -X GET bmc_ip/redfish/v1/Chassis/HGX_GPU_SXM_1/Sensors/HGX_GPU_SXM_1_TEMP_1 
-curl -skL -u "user:passwd" -X GET bmc_ip/redfish/v1/Chassis/HGX_GPU_SXM_8/Sensors/HGX_GPU_SXM_8_TEMP_1 
+curl -skL -u "ADMIN:ADMIN" -X GET https://172.31.60.243p/redfish/v1/Chassis/HGX_GPU_SXM_8/Sensors/HGX_GPU_SXM_8_TEMP_1 |  python -m json.tool
+
+
+#monitor
+curl -skL -u "ADMIN:ADMIN" https://172.31.60.243/redfish/v1/Systems/1/ProcessorSummary/ProcessorMetrics |  python -m json.tool
+curl -skL -u "ADMIN:ADMIN" https://172.31.60.243/redfish/v1/Systems/1/Processors/1/EnvironmentMetrics |  python -m json.tool "Reading": 50
+curl -skL -u "ADMIN:ADMIN" https://172.31.60.243/redfish/v1/Systems/1/Processors/1/ProcessorMetrics |  python -m json.tool  "OperatingSpeedMHz": 2100, 
+
+curl -skL -u "ADMIN:ADMIN" https://172.31.60.243/redfish/v1/Chassis/1/Sensors/CPU1Temp |  python -m json.tool
+curl -skL -u "ADMIN:ADMIN" https://172.31.60.243/redfish/v1/Chassis/HGX_GPU_SXM_8/Sensors/HGX_GPU_SXM_8_TEMP_1 |  python -m json.tool 
+    "Name": "HGX GPU SXM 8 TEMP 1" "PhysicalContext": "GPU" "Reading": 52.562,
