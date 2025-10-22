@@ -1,23 +1,43 @@
 ifconfig ens22f0np0 up
 
 sudo ibportstate mlx5_0 active
-sudo cat /var/log/syslog | grep mlx5_0
+
 cat /sys/class/infiniband/mlx5_6/ports/1/state
+
 dmesg | grep -i rename | awk '{print $5}'
 for i in $(dmesg | grep -i rename | awk '{sub(/:$/, "", $5); print $5}'); do ifconfig $i up; done
-/sys/bus/pci/drivers/uio_pci_generic/0000\:2c\:00.2/
-
 for i in $(ibdev2netdev | awk '{ print $5}'); do echo $i; ifconfig $i up; done
+
+
 ibdev2netdev
 ibdiagnet -r
 ibstat | egrep -i "CA|State|Rate"
+
 mlxlink -d /dev/mst/mt41692_pciconf0 -m 
 mlxlink -d mlx5_2 -m -e -c / mlxlink -d aa:00.0 -m
+mlxlink -d mlx5_7 | grep -e 'Speed ' -e 'Width ' -e 'Enabled Link Speed' -e 'Supported Cable Speed'
+
+
 mlxconfig -d /dev/mst/mt4129_pciconf1 q
 mlxconfig -d <device> EXP_ROM_UEFI_ARM_ENABLE=0 EXP_ROM_UEFI_x86_ENABLE=0
 
+ibv_devinfo -d mlx5_3
 
 mlxlink -d aa:00.0 --cable --ddm / dump
 
 mlxlink -d aa:00.0 --port_type PCIE --show_links
+
+strace -o trace.log <command> // strace apt update
+
+resolvectl
+
+mlxlink -d /dev/mst/mt4129_pciconf0.2 --port_type NETWORK -c -e
+mlxconfig -d /dev/mst/mt4129_pciconf0.2 reset
+
+sudo cat /var/log/syslog | grep mlx5_0
+/sys/bus/pci/drivers/uio_pci_generic/0000\:2c\:00.2/
+
+cat /sys/kernel/debug/mlxbf-ptm/monitors/status/power_throttling_event_count
+cat /sys/kernel/debug/mlxbf-ptm/monitors/status/vr0_power && sudo cat /sys/kernel/debug/mlxbf-ptm/monitors/status/vr1_power && sudo cat /sys/kernel/debug/mlxbf-ptm/monitors/status/total_power
+
 
