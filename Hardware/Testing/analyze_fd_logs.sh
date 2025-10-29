@@ -48,6 +48,64 @@ extract_archive() {
     return $?
 }
 
+# --- Sub-Folder Analysis Function ---
+analyze_subfolder() {
+    local subfolder_path="$1"
+    local activity_id="$2"
+
+    if [ ! -d "$subfolder_path" ]; then
+        echo "Skipping non-existent sub-folder: '$subfolder_path'."
+        return 0
+    fi
+
+    echo "Analyzing sub-folder: $subfolder_path (for ID: $activity_id)"
+
+    # Check for exception.log
+    if [ -f "$subfolder_path/exception.log" ]; then
+        echo -e "${RED}Issue detected: 'exception.log' found in '$subfolder_path'.${NC}"
+    else
+        echo -e "${GREEN}No 'exception.log' found in '$subfolder_path'.${NC}"
+    fi
+
+    # Search all *.log files for "Error Code" lines (excluding all-zero codes)
+    ERROR_CODE_LINES=$(find "$subfolder_path" -type f -name "*.log" -print0 | xargs -0 grep -E "Error Code = [0-9A-F]{12}" 2>/dev/null | grep -vE "Error Code = 0{12}")
+    if [ -n "$ERROR_CODE_LINES" ]; then
+        echo -e "${RED}Error Code lines found in *.log files:${NC}"
+        echo -e "${RED}${ERROR_CODE_LINES}${NC}"
+    else
+        echo -e "${GREEN}No 'Error Code = ' (non-zero) found in *.log files in '$subfolder_path'.${NC}"
+    fi
+}
+
+# --- SXM Sub-Folder Analysis Function ---
+analyze_sxm_subfolder() {
+    local sxm_subfolder_path="$1"
+    local activity_id="$2"
+
+    if [ ! -d "$sxm_subfolder_path" ]; then
+        echo "Skipping non-existent SXM sub-folder: '$sxm_subfolder_path'."
+        return 0
+    fi
+
+    echo "Analyzing SXM sub-folder: $sxm_subfolder_path (for ID: $activity_id)"
+
+    # Check for exception.log
+    if [ -f "$sxm_subfolder_path/exception.log" ]; then
+        echo -e "${RED}Issue detected: 'exception.log' found in '$sxm_subfolder_path'.${NC}"
+    else
+        echo -e "${GREEN}No 'exception.log' found in '$sxm_subfolder_path'.${NC}"
+    fi
+
+    # Search all *.log files for "Error Code" lines (excluding all-zero codes)
+    ERROR_CODE_LINES=$(find "$sxm_subfolder_path" -type f -name "*.log" -print0 | xargs -0 grep -E "Error Code = [0-9A-F]{12}" 2>/dev/null | grep -vE "Error Code = 0{12}")
+    if [ -n "$ERROR_CODE_LINES" ]; then
+        echo -e "${RED}Error Code lines found in *.log files:${NC}"
+        echo -e "${RED}${ERROR_CODE_LINES}${NC}"
+    else
+        echo -e "${GREEN}No 'Error Code = ' (non-zero) found in *.log files in '$sxm_subfolder_path'.${NC}"
+    fi
+}
+
 # --- Script Logic ---
 
 # Check if a log archive was provided as an argument
@@ -76,14 +134,13 @@ if [ ! -f "$LOG_ARCHIVE" ]; then
 fi
 
 echo "Extracting '$LOG_ARCHIVE' to '$TEMP_DIR'..."
-# Call the new extraction function instead of the old tar command
+# Call the extraction function
 if ! extract_archive "$LOG_ARCHIVE" "$TEMP_DIR"; then
     echo "Error: Failed to extract '$LOG_ARCHIVE'."
     exit 1
 fi
 
 # Construct the full path to run.log inside the extracted directory
-# This finds the run.log and assumes its parent directory is the top-level extracted folder
 RUN_LOG_PATH=$(find "$TEMP_DIR" -name "$LOG_FILE_IN_ARCHIVE" | head -n 1)
 
 if [ -z "$RUN_LOG_PATH" ]; then
@@ -93,30 +150,25 @@ fi
 
 echo "Found log file: $RUN_LOG_PATH"
 
-# --- New early check for Final Result: PASS ---
+# --- Early check for Final Result: PASS ---
 if grep -q "Final Result: PASS" "$RUN_LOG_PATH"; then
     echo ""
     echo "--- Analysis Results for $LOG_FILE_IN_ARCHIVE ---"
     echo -e "${GREEN}Final Result: PASS found in log file. No further analysis required.${NC}"
     echo "-------------------------------------"
-    exit 0 # Exit successfully
+    exit 0
 fi
 
-# Determine the top-level directory where the archive was extracted (e.g., logs-YYYYMMDD-HHMMSS)
+# Determine the top-level directory where the archive was extracted
 TOP_LEVEL_EXTRACTED_DIR=$(dirname "$RUN_LOG_PATH")
 
-# Get all test lines that are NOT all zeros (i.e., "true issues")
-# This filters out "MODS-000000000000" and "DGX-000000000000" lines
+# Get all test lines that are NOT all zeros
 ALL_TEST_RESULTS=$(grep -E "^(MODS|DGX)-[0-9A-F]{12}" "$RUN_LOG_PATH")
 TRUE_ISSUES=$(echo "$ALL_TEST_RESULTS" | grep -vE "^(MODS|DGX)-0{12}")
 
-# Count PASS lines among true issues
+# Count PASS and FAIL lines among true issues
 PASS_COUNT=$(echo "$TRUE_ISSUES" | grep -E "\| OK$" | wc -l)
-
-# Count total true issues
 TOTAL_TRUE_ISSUES=$(echo "$TRUE_ISSUES" | wc -l)
-
-# Calculate FAIL count among true issues
 FAIL_COUNT=$((TOTAL_TRUE_ISSUES - PASS_COUNT))
 
 # --- Report Results ---
@@ -128,15 +180,14 @@ echo "FAIL Count: $FAIL_COUNT"
 
 if [ "$FAIL_COUNT" -gt 0 ]; then
     echo ""
-    echo -e "--- ${RED}Failed Test Entries (True Issues)${NC} ---" # Print header in red
-    # Print lines that are true issues but do NOT end with "| OK" in red
+    echo -e "--- ${RED}Failed Test Entries (True Issues)${NC} ---"
     FAILED_TRUE_ISSUES_LINES=$(echo "$TRUE_ISSUES" | grep -vE "\| OK$")
-    echo -e "${RED}${FAILED_TRUE_ISSUES_LINES}${NC}" # Print lines in red
+    echo -e "${RED}${FAILED_TRUE_ISSUES_LINES}${NC}"
 
     echo ""
     echo "--- Detailed Error Codes from Failed Activities ---"
     echo "$FAILED_TRUE_ISSUES_LINES" | while IFS='|' read -r id activity_col rest_of_line; do
-        # Extract the second column (activity) and trim whitespace
+        # Extract and trim activity
         activity=$(echo "$activity_col" | xargs)
 
         # Skip if activity starts with "Ext"
@@ -149,19 +200,27 @@ if [ "$FAIL_COUNT" -gt 0 ]; then
 
         if [ -d "$ERROR_FOLDER" ]; then
             echo "Searching in folder: $ERROR_FOLDER (for ID: $(echo "$id" | xargs))"
-            # Search for "Error Code = " in all files within the folder
-            # Then, filter out lines where the 12-digit code is all zeros
+            # Search for non-zero Error Codes in activity folder
             ERROR_CODE_LINES=$(find "$ERROR_FOLDER" -type f -print0 | xargs -0 grep -E "Error Code = [0-9A-F]{12}" 2>/dev/null | grep -vE "Error Code = 0{12}")
-
             if [ -n "$ERROR_CODE_LINES" ]; then
-                echo -e "${RED}$ERROR_CODE_LINES${NC}" # Print true error codes in red
+                echo -e "${RED}$ERROR_CODE_LINES${NC}"
             else
                 echo "  No 'Error Code = ' (non-zero) found in files within '$ERROR_FOLDER'."
             fi
+
+            # Call sub-folder analysis for this activity folder
+            analyze_subfolder "$ERROR_FOLDER" "$(echo "$id" | xargs)"
+
+            # Check for SXM sub-folders (SXM{1..8}_SN_[0-9]+) in parallel
+            echo "Checking SXM sub-folders in: $ERROR_FOLDER"
+            find "$ERROR_FOLDER" -type d -maxdepth 1 -regex ".*/SXM[1-8]_SN_[0-9]+" | while read -r sxm_folder; do
+                analyze_sxm_subfolder "$sxm_folder" "$(echo "$id" | xargs)" &
+            done
+            # Wait for all parallel SXM sub-folder analyses to complete
+            wait
         else
             echo "Skipping non-existent activity folder: '$ERROR_FOLDER' (Activity: '$activity')."
         fi
     done
 fi
 echo "-------------------------------------"
-
