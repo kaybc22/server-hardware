@@ -2,6 +2,7 @@
 #https://github.com/NVIDIA/TensorRT-LLM/tree/main/benchmarks/cpp
 #https://github.com/mlcommons/inference_results_v5.0/tree/main/closed/NVIDIA/code/mixtral-8x7b/tensorrt
 #https://huggingface.co/models
+#https://docs.nvidia.com/nvidia-hpc-benchmarks/HPL_MxP_benchmark.html
 https://github.com/ollama/ollama
 
 

@@ -1,0 +1,84 @@
+services:
+  node_exporter:
+    image: quay.io/prometheus/node-exporter:latest
+    container_name: node_exporter
+    command: "--path.rootfs=/host"
+    pid: host
+    restart: unless-stopped
+    ports:
+      - "9100:9100"
+    volumes:
+      - /:/host:ro,rslave
+
+  nvidia_exporter:
+    image: nvidia/dcgm-exporter:latest
+    container_name: nvidia_exporter
+    runtime: nvidia
+    cap_add:
+      - SYS_ADMIN
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=all
+    ports:
+      - 9400:9400
+    restart: unless-stopped
+
+  prometheus:
+    image: docker.io/prom/prometheus:latest
+    container_name: prometheus
+    ports:
+      - 9090:9090
+    command: "--config.file=/opt/testing/docker/compose/prometheus.yml"
+#      - "--config.file=/opt/testing/compose/prometheus.yml"
+#      - "--storage.tsdb.path=/prometheus"
+#      - "--storage.tsdb.retention.time=30d"
+    volumes:
+      - /opt/testing/docker/compose/prometheus.yml:/opt/testing/docker/compose/prometheus.yml
+#      - /opt/testing/compose/prometheus.yml:/opt/testing/compose/prometheus.yml
+#      - /opt/testing/prometheus-data:/prometheus
+#      - prometheus-data:/prometheus
+    restart: unless-stopped
+  
+  grafana:
+    image: docker.io/grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+#    volumes:
+#/opt/testing/compose/grafana: dcgm/ipmi/node.json
+#      - ./dashboard:/var/lib/grafana/dashboards
+#      - ./dashboard/grafana:/etc/grafana/provisioning/dashboards
+#    environment:
+#      - GF_AUTH_ANONYMOUS_ENABLED=true
+#      - GF_AUTH_ANONYMOUS_ORG_ROLE=Viewer
+#      - GF_USERS_DEFAULT_THEME=light
+    restart: unless-stopped
+
+  smartctl-exporter:
+    image: prometheuscommunity/smartctl-exporter
+    privileged: true
+    user: root
+    ports:
+      - "9633:9633"
+
+#  ipmi_exporter:
+#    image: quay.io/prometheuscommunity/ipmi-exporter:latest
+#    container_name: ipmi_exporter
+#    ports:
+#      - "9290:9290"
+#    restart: unless-stopped
+#    privileged: true
+#    environment:
+#      - IPMI_EXPORTER_TARGETS=172.31.53.157:ADMIN:ADMIN:ADMINISTRATOR
+#    command:
+#      - --log.level=debug
+#      - --collector.bmc
+#      - --collector.chassis
+#      - --collector.dcmi
+#      - --collector.ipmi
+#      - --collector.sel
+#    volumes:
+#      - /opt/testing/compose/config.yml:/config.yml:ro
+#    command:
+#     - '--config.file=/config.yml'
+
