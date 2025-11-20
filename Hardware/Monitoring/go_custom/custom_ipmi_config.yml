@@ -1,0 +1,9 @@
+modules:
+  default:
+    user: "ADMIN"
+    pass: "ADMIN"
+    host: "172.31.60.243"
+    interval: 15s
+    sensor_uris:
+      - "https://172.31.60.243/redfish/v1/Chassis/1/Sensors/CPU1Temp"
+      - "https://172.31.60.243/redfish/v1/Chassis/1/Sensors/CPU2Temp"
