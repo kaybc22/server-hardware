@@ -1,0 +1,9 @@
+---
+- name: Run quick check script
+  hosts: all
+  become: yes
+
+  tasks:
+    - name: Execute quick_check script
+      script: quick_check.sh
+

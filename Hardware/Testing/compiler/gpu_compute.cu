@@ -8,7 +8,6 @@ int main() {
         printf("Error: Failed to get device count: %s\n", cudaGetErrorString(err));
         return 1;
     }
-#nvcc -o gpu_test gpu_test.cu -gencode arch=compute_100,code=sm_100
     if (deviceCount == 0) {
         printf("No CUDA-capable devices found.\n");
         return 1;

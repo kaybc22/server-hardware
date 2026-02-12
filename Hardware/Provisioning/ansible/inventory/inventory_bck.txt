@@ -1,0 +1,46 @@
+all:
+  hosts:
+    node01:
+      ansible_host: 192.168.1.101          # replace with real IP
+      ansible_user: your_ssh_user          # e.g. ubuntu, root, etc.
+      ansible_become: yes                  # sudo
+      ansible_become_method: sudo
+
+    node02:
+      ansible_host: 192.168.1.102
+      ansible_user: your_ssh_user
+      ansible_become: yes
+
+    # ... add more nodes as needed
+
+  children:
+    dgx_nodes:
+      hosts:
+        node01:
+        node02:
+      vars:
+        cuda_version: "13.1"
+        distribution: "{{ ansible_distribution | lower }}{{ ansible_distribution_major_version }}"
+
+----
+all:
+  hosts:
+    master:
+      ansible_host: 172.31.36.195
+    client01:
+      ansible_host: 172.31.36.196
+    client02:
+      ansible_host: 172.31.36.197
+    client03:
+      ansible_host: 172.31.36.198
+  children:
+    clients:
+      hosts:
+        client01:
+        client02:
+        client03:
+    gpu_nodes:
+      hosts:
+        client01:
+        client02:
+        client03:

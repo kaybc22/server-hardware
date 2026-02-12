@@ -1,0 +1,96 @@
+---
+- name: Deploy NVIDIA stack + utilities on DGX/Blackwell nodes
+  hosts: dgx_nodes
+  become: yes
+  vars:
+    cuda_version: "13.1"
+    cuda_major: "{{ cuda_version.split('.')[0] }}"
+    cuda_minor: "{{ cuda_version.split('.')[1] }}"
+
+  tasks:
+
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600
+
+    - name: Install base utilities
+      apt:
+        name:
+          - fio
+          - sysstat
+          - nvme-cli
+          - sshpass
+          - ipmitool
+          - dos2unix
+          - infiniband-diags
+          - libibumad3
+          - make
+          - gcc
+          - hwloc
+          - numactl
+          - net-tools
+          - mstflint
+          - pv
+          - powertop
+          - nload
+          - iftop
+          - unzip
+          - expect
+          - dkms
+          - jq
+          - nfs-common
+          - python3
+          - openmpi-bin
+          - cifs-utils
+          - nmon
+          - policycoreutils-python-utils
+          - python3-pip
+          - python3-matplotlib
+        state: present
+        update_cache: no
+
+    - name: Add NVIDIA CUDA repository keyring
+      shell: |
+        distribution=$(. /etc/os-release;echo $ID$VERSION_ID | sed -e 's/\.//g')
+        wget -qO- https://developer.download.nvidia.com/compute/cuda/repos/$distribution/x86_64/cuda-keyring_1.1-1_all.deb -O /tmp/cuda-keyring.deb
+        dpkg -i /tmp/cuda-keyring.deb
+        rm -f /tmp/cuda-keyring.deb
+      args:
+        creates: /etc/apt/sources.list.d/cuda-*.list
+
+    - name: Update apt cache after adding NVIDIA repo
+      apt:
+        update_cache: yes
+
+    - name: Install NVIDIA open driver + CUDA toolkit
+      apt:
+        name:
+          - nvidia-open
+          - "cuda-toolkit-{{ cuda_version | replace('.', '-') }}"
+        state: present
+        update_cache: no
+
+    - name: Add CUDA to PATH and LD_LIBRARY_PATH in .bashrc (for all users)
+      blockinfile:
+        path: /etc/profile.d/cuda.sh
+        create: yes
+        block: |
+          export PATH=/usr/local/cuda-{{ cuda_version }}/bin${PATH:+:${PATH}}
+          export LD_LIBRARY_PATH=/usr/local/cuda-{{ cuda_version }}/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
+        mode: '0644'
+
+    - name: Load ib_umad module at boot
+      copy:
+        content: "ib_umad"
+        dest: /etc/modules-load.d/ib_umad.conf
+        mode: '0644'
+
+    - name: Ensure ib_umad is loaded now
+      modprobe:
+        name: ib_umad
+        state: present
+
+    - name: Print completion message
+      debug:
+        msg: "NVIDIA driver + CUDA {{ cuda_version }} deployment completed on {{ inventory_hostname }}"

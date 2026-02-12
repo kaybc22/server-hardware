@@ -5,9 +5,9 @@ int main() {
     int gpuA, gpuB;
     size_t dataMB;
 
-    std::cout << "Enter source GPU ID (1–8): ";
+    std::cout << "Enter source GPU ID (1-8): ";
     std::cin >> gpuA;
-    std::cout << "Enter destination GPU ID (1–8): ";
+    std::cout << "Enter destination GPU ID (1-8): ";
     std::cin >> gpuB;
     std::cout << "Enter data size in MB (e.g., 10, 100000): ";
     std::cin >> dataMB;

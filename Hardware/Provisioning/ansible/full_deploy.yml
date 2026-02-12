@@ -1,0 +1,132 @@
+- name: Bootstrap & configure full 4-node HPC cluster
+  hosts: all
+  become: yes
+  vars:
+    cluster_master_ip: "{{ cluster_master_ip }}"
+  tasks:
+    - name: Set hostname
+      hostname:
+        name: "{{ inventory_hostname }}"
+
+    - name: Update /etc/hosts
+      lineinfile:
+        path: /etc/hosts
+        line: "{{ hostvars[item]['ansible_host'] }} {{ item }}"
+      loop: [master, client01, client02, client03]
+
+    - name: Install essential tools
+      apt:
+        name:
+          - sshpass, ipmitool, dos2unix, make, gcc, hwloc, numactl, net-tools
+          - pv, nload, iftop, unzip, dkms, jq, nfs-common, openmpi-bin
+          - cifs-utils, nmon, policycoreutils-python-utils, python3-pip
+          - python3-matplotlib, stress-ng, fio, sysstat, nvme-cli, infiniband-diags
+          - libibumad3, mstflint, powertop
+        state: present
+        update_cache: yes
+
+    - name: Add NVIDIA CUDA repo
+      shell: |
+        distribution=$(. /etc/os-release;echo $ID$VERSION_ID | sed -e 's/\.//g')
+        wget -q https://developer.download.nvidia.com/compute/cuda/repos/$distribution/x86_64/cuda-keyring_1.1-1_all.deb
+        dpkg -i cuda-keyring_1.1-1_all.deb
+        rm cuda-keyring_1.1-1_all.deb
+      args:
+        creates: /etc/apt/sources.list.d/cuda-*.list
+
+    - name: Add Docker repo
+      shell: |
+        echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list
+        curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.asc
+      args:
+        creates: /etc/apt/sources.list.d/docker.list
+
+    - name: Add NVIDIA Container Toolkit repo
+      shell: |
+        curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey | gpg --dearmor -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg
+        curl -s -L https://nvidia.github.io/libnvidia-container/stable/deb/nvidia-container-toolkit.list | \
+          sed 's#deb https://#deb [signed-by=/usr/share/keyrings/nvidia-container-toolkit-keyring.gpg] https://#g' | \
+          tee /etc/apt/sources.list.d/nvidia-container-toolkit.list
+        sed -i '/experimental/s/^#//' /etc/apt/sources.list.d/nvidia-container-toolkit.list
+      args:
+        creates: /etc/apt/sources.list.d/nvidia-container-toolkit.list
+
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+
+    - name: Install GPU stack + Docker
+      apt:
+        name:
+          - nvidia-open, cuda-toolkit-13-0
+          - nvidia-fabricmanager, datacenter-gpu-manager-4-cuda13
+          - docker-ce, docker-ce-cli, containerd.io
+          - docker-buildx-plugin, docker-compose-plugin
+          - nvidia-container-toolkit
+        state: present
+
+    - name: Configure Docker for NVIDIA
+      command: nvidia-ctk runtime configure --runtime=docker
+      notify: restart docker
+
+    - name: Enable services
+      systemd:
+        name: "{{ item }}"
+        enabled: yes
+        state: started
+      loop:
+        - nvidia-fabricmanager
+        - nvidia-dcgm
+        - docker
+
+    - name: Add CUDA to PATH & LD_LIBRARY_PATH
+      blockinfile:
+        path: /etc/profile.d/cuda.sh
+        create: yes
+        marker: "# {mark} CUDA ENV"
+        block: |
+          export PATH=/usr/local/cuda-13.0/bin${PATH:+:${PATH}}
+          export LD_LIBRARY_PATH=/usr/local/cuda-13.0/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
+
+    - name: Load ib_umad module
+      lineinfile:
+        path: /etc/modules
+        line: ib_umad
+        create: yes
+
+- name: Master-only tasks (copy tools, shared dirs)
+  hosts: master
+  become: yes
+  tasks:
+    - name: Create /opt/testing/tools
+      file:
+        path: /opt/testing/tools
+        state: directory
+        mode: '0755'
+
+    - name: Copy your tools (adjust path on your laptop!)
+      copy:
+        src: /path/to/your/local/tools/   # CHANGE THIS
+        dest: /opt/testing/tools/
+        mode: preserve
+      delegate_to: localhost
+
+    - name: Distribute tools to all clients
+      synchronize:
+        src: /opt/testing/tools/
+        dest: /opt/testing/tools/
+      delegate_to: "{{ item }}"
+      loop: [client01, client02, client03]
+
+    - name: Create shared NFS export (optional)
+      lineinfile:
+        path: /etc/exports
+        line: "/opt/testing *(rw,sync,no_root_squash)"
+        create: yes
+      notify: restart nfs
+
+  handlers:
+    - name: restart docker
+      systemd: name=docker state=restarted
+    - name: restart nfs
+      systemd: name=nfs-kernel-server state=restarted
