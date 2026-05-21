@@ -1,8 +1,13 @@
+#V1
+deploy_keys_ansible_v1.sh # add ssh_key and install ansbile to all the node in ip.txt
+build_inventory.sh # use ip.txt to create the inventory.yaml
+ansible -i inventory.yaml all -m ping  # check
+
 #running command in the ansible folder
 
 ansible all -i inventory/inventory.yml quick_check.yml --check # quick_check.yml include the quick_check.sh script
 
-ansible-playbook -i inventory/inventory.yml deploy-nvidia.yml --check
+ansible-playbook -i inventory/inventory.yml inventory/full_deploy.yml --check
 
 #ansible directory structure 
 ansible

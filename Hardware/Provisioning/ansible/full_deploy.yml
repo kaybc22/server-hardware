@@ -1,4 +1,4 @@
-- name: Bootstrap & configure full 4-node HPC cluster
+- name: Install drivers, tools, and all necessary dependency packages for system functionality.
   hosts: all
   become: yes
   vars:
@@ -58,7 +58,7 @@
     - name: Install GPU stack + Docker
       apt:
         name:
-          - nvidia-open, cuda-toolkit-13-0
+          - nvidia-open, cuda-toolkit-13-1, nvlsm
           - nvidia-fabricmanager, datacenter-gpu-manager-4-cuda13
           - docker-ce, docker-ce-cli, containerd.io
           - docker-buildx-plugin, docker-compose-plugin
@@ -85,8 +85,8 @@
         create: yes
         marker: "# {mark} CUDA ENV"
         block: |
-          export PATH=/usr/local/cuda-13.0/bin${PATH:+:${PATH}}
-          export LD_LIBRARY_PATH=/usr/local/cuda-13.0/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
+          export PATH=/usr/local/cuda-13.1/bin${PATH:+:${PATH}}
+          export LD_LIBRARY_PATH=/usr/local/cuda-13.1/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
 
     - name: Load ib_umad module
       lineinfile:
@@ -94,39 +94,39 @@
         line: ib_umad
         create: yes
 
-- name: Master-only tasks (copy tools, shared dirs)
-  hosts: master
-  become: yes
-  tasks:
-    - name: Create /opt/testing/tools
-      file:
-        path: /opt/testing/tools
-        state: directory
-        mode: '0755'
+#- name: Master-only tasks (copy tools, shared dirs)
+#  hosts: master
+#  become: yes
+#  tasks:
+#    - name: Create /opt/testing/tools
+#      file:
+#        path: /opt/testing/tools
+#        state: directory
+#        mode: '0755'
 
-    - name: Copy your tools (adjust path on your laptop!)
-      copy:
-        src: /path/to/your/local/tools/   # CHANGE THIS
-        dest: /opt/testing/tools/
-        mode: preserve
-      delegate_to: localhost
+#    - name: Copy your tools (adjust path on your laptop!)
+#      copy:
+#        src: /path/to/your/local/tools/   # CHANGE THIS
+#        dest: /opt/testing/tools/
+#        mode: preserve
+#      delegate_to: localhost
 
-    - name: Distribute tools to all clients
-      synchronize:
-        src: /opt/testing/tools/
-        dest: /opt/testing/tools/
-      delegate_to: "{{ item }}"
-      loop: [client01, client02, client03]
+#    - name: Distribute tools to all clients
+#      synchronize:
+#        src: /opt/testing/tools/
+#        dest: /opt/testing/tools/
+#      delegate_to: "{{ item }}"
+#      loop: [client01, client02, client03]
 
-    - name: Create shared NFS export (optional)
-      lineinfile:
-        path: /etc/exports
-        line: "/opt/testing *(rw,sync,no_root_squash)"
-        create: yes
-      notify: restart nfs
+#    - name: Create shared NFS export (optional)
+#      lineinfile:
+#        path: /etc/exports
+#        line: "/opt/testing *(rw,sync,no_root_squash)"
+#        create: yes
+#      notify: restart nfs
 
-  handlers:
-    - name: restart docker
-      systemd: name=docker state=restarted
-    - name: restart nfs
-      systemd: name=nfs-kernel-server state=restarted
+#  handlers:
+#    - name: restart docker
+#      systemd: name=docker state=restarted
+#    - name: restart nfs
+#      systemd: name=nfs-kernel-server state=restarted

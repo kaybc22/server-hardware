@@ -1,0 +1,11 @@
+all:
+  hosts:
+    master:
+      ansible_host: 172.31.57.112
+
+    dgx_node_1:
+      ansible_host: 10.58.142.91
+
+    dgx_node_2:
+      ansible_host: 172.31.53.34
+
