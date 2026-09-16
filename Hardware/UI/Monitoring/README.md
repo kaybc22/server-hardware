@@ -30,3 +30,6 @@ sudo docker run --rm --runtime=nvidia --gpus all ubuntu nvidia-smi
 docker run --gpus all --rm -it -v /container/volumes/dcgm:/usr/local/dcgm:rw gpu-burn 60
 
 docker run -d --gpus all --cap-add SYS_ADMIN --rm -p 9400:9400 nvcr.io/nvidia/k8s/dcgm-exporter:4.2.3-4.1.1-ubuntu22.04
+
+
+#python3 /usr/lib/systemd/system/monitor_web_v1.py

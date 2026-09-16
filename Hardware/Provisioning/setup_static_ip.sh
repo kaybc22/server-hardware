@@ -8,15 +8,20 @@ echo "This script will create a static IP config using Netplan"
 echo "-----------------------------------------------------"
 
 # Step 1: Detect interface, IP, Gateway
-INTERFACE=$(ip -o link show | awk -F': ' '{print $2}' | grep -E '^(en|eth)' | head -n1)
+INTERFACE=$(ip -o link show | awk -F': ' '/state UP/ {print $2}' | grep -E '^(en|eth)' | head -n1)
+
+if [ -z "$INTERFACE" ]; then
+    echo "No active Ethernet interface detected."
+    exit 1
+fi
 
 CURRENT_IP=$(ip -4 addr show "$INTERFACE" 2>/dev/null | grep -oP '(?<=inet\s)\d+(\.\d+){3}(?=/)' | head -n1)
 CURRENT_PREFIX=$(ip -4 addr show "$INTERFACE" 2>/dev/null | grep -oP '(?<=inet\s)\d+(\.\d+){3}/\K\d+')
 CURRENT_GW=$(ip route | grep default | grep "$INTERFACE" | awk '{print $3}' | head -n1)
 
-echo "Detected Interface : $INTERFACE"
-echo "Current IP         : $CURRENT_IP/$CURRENT_PREFIX"
-echo "Current Gateway    : $CURRENT_GW"
+echo "Active Interface : $INTERFACE"
+echo "Current IP       : $CURRENT_IP/$CURRENT_PREFIX"
+echo "Current Gateway  : $CURRENT_GW"
 
 # Step 2: Improved DNS Detection
 echo -e "\nDetecting DNS servers..."
