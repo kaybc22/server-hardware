@@ -1,4 +1,4 @@
-#README
+#UG --> *.txt
 #instruction
 #lab.sh
 #GPU_burn

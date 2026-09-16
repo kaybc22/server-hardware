@@ -1,6 +1,6 @@
 #!/bin/bash
 # =============================================
-# Enhanced BIOS NVMe Firmware Source Updater
+# Modify BIOS File for SAA to enable NVMe Driver Feature
 # Input: IP(s) or full bios.* filenames
 # Output: Creates current.file.$ip (original untouched)
 # =============================================
